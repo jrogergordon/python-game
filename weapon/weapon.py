@@ -10,4 +10,4 @@ class Weapon:
         if self.usage == 0:
             self.broken = 1
             self.speed = 0
-            self.strength = 0
+            self.strength = 0 
