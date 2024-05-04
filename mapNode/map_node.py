@@ -5,5 +5,5 @@ class board_node:
         self.parent = parent
         self.x = x
         self.y = y
-        self.occupant = 0
+        self.occupant = obstacle
         self.show = show

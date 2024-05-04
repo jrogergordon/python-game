@@ -1,7 +1,11 @@
+import sys
+sys.path.append('/mnt/c/Users/jroge/OneDrive/Desktop/python_game/') 
+
 import unittest
-from board.board import GameBoard
+from board import GameBoard
 from character.character import Character
-from ..mapNode.map_node import board_node
+from mapNode.map_node import board_node
+from weapon.weapon import Weapon
 
 class TestGameBoard(unittest.TestCase):
 
@@ -193,6 +197,97 @@ class TestGameBoard(unittest.TestCase):
         # Check that nodes have been updated correctly
         self.assertEqual(self.game_board.board[2][1].show, "")
         self.assertEqual(self.game_board.board[2][3].show, "")
+
+    def test_fight_no_weapons(self):
+        character1 = Character(strength=10, defense=5, health=100)
+        character2 = Character(strength=8, defense=3, health=100)
+        self.game_board.fight(character1, character2)
+        self.assertEqual(character1.health, 97)  # 100 - (8 - 5)
+        self.assertEqual(character2.health, 93)  # 100 - (10 - 3)
+
+    def test_fight_with_weapon(self):
+        character1 = Character(strength=10, defense=5, health=100)
+        character2 = Character(strength=8, defense=3, health=100)
+        weapon = Weapon(strength=5, usage=2, broken=False)
+        character1.equipped = weapon
+        self.game_board.fight(character1, character2)
+        self.assertEqual(character1.health, 97)  # 100 - (8 - 5)
+        self.assertEqual(character2.health, 88)  # 100 - (10 + 5 - 3)
+
+    def test_fight_with_broken_weapon(self):
+        character1 = Character(strength=10, defense=5, health=100)
+        character2 = Character(strength=8, defense=3, health=100)
+        weapon = Weapon(strength=5, usage=2, broken=True)
+        character1.equipped = weapon
+        self.game_board.fight(character1, character2)
+        self.assertEqual(character1.health, 97)  # 100 - (8 - 5)
+        self.assertEqual(character2.health, 93)  # 100 - (10 - 3)
+
+    def test_fight_with_weapon_usage_0(self):
+        character1 = Character(strength=10, defense=5, health=100)
+        character2 = Character(strength=8, defense=3, health=100)
+        weapon = Weapon(strength=5, usage=0, broken=False)
+        character1.equipped = weapon
+        self.game_board.fight(character1, character2)
+        self.assertEqual(character1.health, 97)  # 100 - (8 - 5)
+        self.assertEqual(character2.health, 100)  # No attack due to weapon usage 0
+
+    def test_fight_speed_difference(self):
+        character1 = Character(strength=10, defense=5, speed=10, health=100)
+        character2 = Character(strength=8, defense=3, speed=6, health=100)
+        self.game_board.fight(character1, character2)
+        self.assertEqual(character1.health, 97)  # 100 - (8 - 5)
+        self.assertEqual(character2.health, 86)  # 100 - (10 - 3) * 2
+
+    # def test_find_targets_yellow_team_reachable(self):
+    #     node = self.game_board.board[1][1]
+    #     node.occupant = Character(team="yellow", move=5)
+    #     target_node = self.game_board.board[2][2]
+    #     target_node.occupant = Character(team="red", move=5)
+    #     targets = self.game_board.find_targets(node)
+    #     self.assertEqual(targets, [(2, 2)])
+
+    # def test_find_targets_yellow_team_unreachable(self):
+    #     node = self.game_board.board[1][1]
+    #     node.occupant = Character(team="yellow", move=1)
+    #     target_node = self.game_board.board[3][3]
+    #     target_node.occupant = Character(team="red", move=5)
+    #     targets = self.game_board.find_targets(node)
+    #     self.assertEqual(targets, [])
+
+    # def test_find_targets_red_team_reachable(self):
+    #     node = self.game_board.board[1][1]
+    #     node.occupant = Character(team="red", move=5)
+    #     target_node1 = self.game_board.board[2][2]
+    #     target_node1.occupant = Character(team="blue", move=5)
+    #     target_node2 = self.game_board.board[3][3]
+    #     target_node2.occupant = Character(team="yellow", move=5)
+    #     targets = self.game_board.find_targets(node)
+    #     self.assertEqual(targets, [(2, 2), (3, 3)])
+
+    # def test_find_targets_red_team_unreachable(self):
+    #     node = self.game_board.board[1][1]
+    #     node.occupant = Character(team="red", move=1)
+    #     target_node1 = self.game_board.board[3][3]
+    #     target_node1.occupant = Character(team="blue", move=5)
+    #     target_node2 = self.game_board.board[4][4]
+    #     target_node2.occupant = Character(team="yellow", move=5)
+    #     targets = self.game_board.find_targets(node)
+    #     self.assertEqual(targets, [])
+
+    # def test_find_targets_no_targets(self):
+    #     node = self.game_board.board[1][1]
+    #     node.occupant = Character(team="yellow", move=5)
+    #     targets = self.game_board.find_targets(node)
+    #     self.assertEqual(targets, [])
+
+    # def test_find_targets_out_of_range(self):
+    #     node = self.game_board.board[0][0]
+    #     node.occupant = Character(team="yellow", move=5)
+    #     target_node = self.game_board.board[self.game_board.max][self.game_board.max]
+    #     target_node.occupant = Character(team="red", move=5)
+    #     targets = self.game_board.find_targets(node)
+    #     self.assertEqual(targets, [])
 
 if __name__ == '__main__':
     unittest.main()

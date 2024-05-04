@@ -1,17 +1,24 @@
-import heapq
+import sys
+sys.path.append('/mnt/c/Users/jroge/OneDrive/Desktop/python_game/') 
+
 from mapNode.map_node import board_node
 from character.character import Character
 
 class GameBoard:
-    def __init__(self):
+    def __init__(self, max=9, players=[], enemies=[], other=[], ally=[]):
         self.board = self.create_board()
+        self.max = max
+        self.players = players
+        self.enemies = enemies
+        self.others = other
+        self.ally = ally
 
     def create_board(self):
         board = []
         for i in range(9):
             row = []
             for j in range(9):
-                node = board_node(0, 0, None, j, i)  # x is j, y is i
+                node = board_node(0, 0, None, j, i, 0)  # x is j, y is i
                 row.append(node)
             board.append(row)
         return board
@@ -39,12 +46,58 @@ class GameBoard:
         self.board[x][y] = piece
 
     def fight(self, character1, character2):
-        damage = character1.strength - character2.defense
-        if damage > 0:
-            if damage > character2.health:
-                character2.health = 0
-            else:    
-                character2.change_health(-damage)
+        # Check if either character has a weapon equipped
+        weapon1 = character1.equipped
+        weapon2 = character2.equipped
+
+        # Calculate damage for each character
+        damage1 = character1.strength - character2.defense
+        damage2 = character2.strength - character1.defense
+
+        # Add weapon strength to damage if applicable
+        if weapon1 and not weapon1.broken:
+            damage1 += weapon1.strength
+        if weapon2 and not weapon2.broken:
+            damage2 += weapon2.strength
+
+        # Check if character 1 can attack twice
+        if character1.speed >= character2.speed + 4:
+            num_attacks1 = 2
+        else:
+            num_attacks1 = 1
+
+        # Check if character 2 can attack twice
+        if character2.speed >= character1.speed + 4:
+            num_attacks2 = 2
+        else:
+            num_attacks2 = 1
+
+        # Perform attacks
+        for _ in range(num_attacks1):
+            if weapon1 and weapon1.usage == 0:
+                break
+            if damage1 > 0:
+                if damage1 > character2.health:
+                    character2.health = 0
+                else:
+                    character2.change_health(-damage1)
+            if weapon1:
+                weapon1.usage -= 1
+                if weapon1.usage < 0:
+                    weapon1.usage = 0
+
+        for _ in range(num_attacks2):
+            if weapon2 and weapon2.usage == 0:
+                break
+            if damage2 > 0:
+                if damage2 > character1.health:
+                    character1.health = 0
+                else:
+                    character1.change_health(-damage2)
+            if weapon2:
+                weapon2.usage -= 1
+                if weapon2.usage < 0:
+                    weapon2.usage = 0
 
     def a_star(self, start, goal):
         moves = start.occupant.move
@@ -142,6 +195,43 @@ class GameBoard:
                 elif node.occupant == 1:
                     node.show = ""
 
+    def find_targets(self, node):
+        max_distance = self.max
+        scanned_nodes = []
+        
+        # Check which team is occupying the current node
+        if node.occupant.team == "yellow":
+            target_teams = ["red"]
+        elif node.occupant.team == "red":
+            target_teams = ["blue", "yellow"]
+        else:
+            return []  # Return an empty list if the occupant's team is neither yellow nor red
+        
+        # Scan the area around the node
+        for x in range(-max_distance, max_distance + 1):
+            for y in range(-max_distance, max_distance + 1):
+                # Skip the current node
+                if x == 0 and y == 0:
+                    continue
+                
+                # Calculate the coordinates of the node to check
+                check_x = node.x + x
+                check_y = node.y + y
+                
+                # Check if the node is within the board boundaries
+                if 0 <= check_x < len(self.board[0]) and 0 <= check_y < len(self.board):
+                    # Get the node at the calculated coordinates
+                    check_node = self.board[check_y][check_x]
+                    
+                    # Check if the node has an occupant and if it's a character object
+                    if isinstance(check_node.occupant, Character):
+                        # Check if the occupant's team is one of the target teams
+                        if check_node.occupant.team in target_teams:
+                            if self.a_star(check_node, node):
+                                scanned_nodes.append((check_x, check_y))
+        
+        return scanned_nodes
+
 # Create and display the game board
-game_board = GameBoard()
-game_board.display_board()
+# game_board = GameBoard()
+# game_board.display_board()

@@ -1,5 +1,8 @@
+import sys
+sys.path.append('/mnt/c/Users/jroge/OneDrive/Desktop/python_game/')  # Add parent directory to the Python path
+from weapon import Weapon
 import unittest
-from weapon import Weapon  # assuming the Weapon class is in a file named weapon.py
+
 
 class TestWeapon(unittest.TestCase):
 
