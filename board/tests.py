@@ -239,55 +239,5 @@ class TestGameBoard(unittest.TestCase):
         self.assertEqual(character1.health, 97)  # 100 - (8 - 5)
         self.assertEqual(character2.health, 86)  # 100 - (10 - 3) * 2
 
-    # def test_find_targets_yellow_team_reachable(self):
-    #     node = self.game_board.board[1][1]
-    #     node.occupant = Character(team="yellow", move=5)
-    #     target_node = self.game_board.board[2][2]
-    #     target_node.occupant = Character(team="red", move=5)
-    #     targets = self.game_board.find_targets(node)
-    #     self.assertEqual(targets, [(2, 2)])
-
-    # def test_find_targets_yellow_team_unreachable(self):
-    #     node = self.game_board.board[1][1]
-    #     node.occupant = Character(team="yellow", move=1)
-    #     target_node = self.game_board.board[3][3]
-    #     target_node.occupant = Character(team="red", move=5)
-    #     targets = self.game_board.find_targets(node)
-    #     self.assertEqual(targets, [])
-
-    # def test_find_targets_red_team_reachable(self):
-    #     node = self.game_board.board[1][1]
-    #     node.occupant = Character(team="red", move=5)
-    #     target_node1 = self.game_board.board[2][2]
-    #     target_node1.occupant = Character(team="blue", move=5)
-    #     target_node2 = self.game_board.board[3][3]
-    #     target_node2.occupant = Character(team="yellow", move=5)
-    #     targets = self.game_board.find_targets(node)
-    #     self.assertEqual(targets, [(2, 2), (3, 3)])
-
-    # def test_find_targets_red_team_unreachable(self):
-    #     node = self.game_board.board[1][1]
-    #     node.occupant = Character(team="red", move=1)
-    #     target_node1 = self.game_board.board[3][3]
-    #     target_node1.occupant = Character(team="blue", move=5)
-    #     target_node2 = self.game_board.board[4][4]
-    #     target_node2.occupant = Character(team="yellow", move=5)
-    #     targets = self.game_board.find_targets(node)
-    #     self.assertEqual(targets, [])
-
-    # def test_find_targets_no_targets(self):
-    #     node = self.game_board.board[1][1]
-    #     node.occupant = Character(team="yellow", move=5)
-    #     targets = self.game_board.find_targets(node)
-    #     self.assertEqual(targets, [])
-
-    # def test_find_targets_out_of_range(self):
-    #     node = self.game_board.board[0][0]
-    #     node.occupant = Character(team="yellow", move=5)
-    #     target_node = self.game_board.board[self.game_board.max][self.game_board.max]
-    #     target_node.occupant = Character(team="red", move=5)
-    #     targets = self.game_board.find_targets(node)
-    #     self.assertEqual(targets, [])
-
 if __name__ == '__main__':
     unittest.main()

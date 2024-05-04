@@ -195,42 +195,30 @@ class GameBoard:
                 elif node.occupant == 1:
                     node.show = ""
 
-    def find_targets(self, node):
-        max_distance = self.max
-        scanned_nodes = []
-        
-        # Check which team is occupying the current node
-        if node.occupant.team == "yellow":
-            target_teams = ["red"]
-        elif node.occupant.team == "red":
-            target_teams = ["blue", "yellow"]
-        else:
-            return []  # Return an empty list if the occupant's team is neither yellow nor red
-        
-        # Scan the area around the node
-        for x in range(-max_distance, max_distance + 1):
-            for y in range(-max_distance, max_distance + 1):
-                # Skip the current node
-                if x == 0 and y == 0:
-                    continue
-                
-                # Calculate the coordinates of the node to check
-                check_x = node.x + x
-                check_y = node.y + y
-                
-                # Check if the node is within the board boundaries
-                if 0 <= check_x < len(self.board[0]) and 0 <= check_y < len(self.board):
-                    # Get the node at the calculated coordinates
-                    check_node = self.board[check_y][check_x]
-                    
-                    # Check if the node has an occupant and if it's a character object
-                    if isinstance(check_node.occupant, Character):
-                        # Check if the occupant's team is one of the target teams
-                        if check_node.occupant.team in target_teams:
-                            if self.a_star(check_node, node):
-                                scanned_nodes.append((check_x, check_y))
-        
-        return scanned_nodes
+# def find_targets(self, team):
+#     if team == "blue":
+#         enemies = self.enemies
+#     elif team == "yellow":
+#         enemies = self.enemies
+#     else:
+#         enemies = self.ally + self.others
+
+#     scanned_nodes = []
+    
+#     for enemy in enemies:
+#         for node in self.board:
+#             for occupant in node:
+#                 if occupant and occupant.team != team:
+#                     if abs(occupant.x - enemy.x) + abs(occupant.y - enemy.y) <= enemy.move:
+#                         if self.a_star(occupant, enemy):
+#                             enemy_strength = enemy.strength
+#                             if enemy.equipped and hasattr(enemy.equipped, 'strength'):
+#                                 enemy_strength += enemy.equipped.strength
+#                             scanned_nodes.append((enemy, enemy_strength))
+
+#     scanned_nodes.sort(key=lambda x: x[1], reverse=True)
+    
+#     return [x[0] for x in scanned_nodes]
 
 # Create and display the game board
 # game_board = GameBoard()
