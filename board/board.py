@@ -195,31 +195,83 @@ class GameBoard:
                 elif node.occupant == 1:
                     node.show = ""
 
-# def find_targets(self, team):
-#     if team == "blue":
-#         enemies = self.enemies
-#     elif team == "yellow":
-#         enemies = self.enemies
-#     else:
-#         enemies = self.ally + self.others
+    def find_targets(self, team):
+        if team == "green":
+            group = self.others
+        elif team == "yellow":
+            group = self.ally
+        else:
+            group = self.enemies
 
-#     scanned_nodes = []
+        scanned_nodes = {}
+        
+        for unit in group:
+            unit_scanned = []
+            for x in range(max(0, unit.x - unit.move), min(9, unit.x + unit.move + 1)):
+                for y in range(max(0, unit.y - unit.move), min(9, unit.y + unit.move + 1)):
+                    if x == 4 and y == 1: print("made it")
+                    if abs(x - unit.x) + abs(y - unit.y) <= unit.move:
+                        node = self.board[y][x]
+                        if node.occupant and isinstance(node.occupant, Character) and ((team in ["yellow", "green"] and node.occupant.team == "red") or (team == "red" and node.occupant.team != team)):
+                            adjacent_nodes = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
+                            reachable_nodes = []
+                            for adj_x, adj_y in adjacent_nodes:
+                                if 0 <= adj_x < 9 and 0 <= adj_y < 9:
+                                    if self.a_star(self.board[unit.y][unit.x], self.board[adj_y][adj_x]):
+                                        reachable_nodes.append((adj_y, adj_x))
+                            if reachable_nodes:
+                                unit_scanned.append([node.occupant, reachable_nodes])
+            scanned_nodes[unit] = unit_scanned
+
+        return scanned_nodes
     
-#     for enemy in enemies:
-#         for node in self.board:
-#             for occupant in node:
-#                 if occupant and occupant.team != team:
-#                     if abs(occupant.x - enemy.x) + abs(occupant.y - enemy.y) <= enemy.move:
-#                         if self.a_star(occupant, enemy):
-#                             enemy_strength = enemy.strength
-#                             if enemy.equipped and hasattr(enemy.equipped, 'strength'):
-#                                 enemy_strength += enemy.equipped.strength
-#                             scanned_nodes.append((enemy, enemy_strength))
+# Test 1: Enemy in range
+game = GameBoard()
+game.enemies = [Character(name="Red Enemy", x=1, y=1, team="red", move=1)]
+game.board[1][1].occupant = game.enemies[0]
+game.others = [Character(name="Green Friend", x=2, y=2, team="green", move=2)]
+game.board[2][2].occupant = game.others[0]
+print("Test 1: Enemy in range")
+targets = game.find_targets("green")
+for key, values in targets.items():
+    for value in values:
+        print(f"{key.name}: {value[0].name}, {value[1]}")
 
-#     scanned_nodes.sort(key=lambda x: x[1], reverse=True)
-    
-#     return [x[0] for x in scanned_nodes]
+# Test 2: Enemy out of range
+game = GameBoard()
+game.enemies = [Character(name="Red Enemy", x=1, y=1, team="red", move=1)]
+game.board[1][1].occupant = game.enemies[0]
+game.others = [Character(name="Green Friend", x=4, y=4, team="green", move=2)]
+game.board[4][4].occupant = game.others[0]
+print("Test 2: Enemy out of range")
+targets = game.find_targets("green")
+for key, values in targets.items():
+    for value in values:
+        print(f"{key.name}: {value[0].name}, {value[1]}")
 
-# Create and display the game board
-# game_board = GameBoard()
-# game_board.display_board()
+# Test 3: Enemy on edge of range
+game = GameBoard()
+game.enemies = [Character(name="Red Enemy", x=4, y=1, team="red", move=1)]
+game.board[1][4].occupant = game.enemies[0]
+game.others = [Character(name="Green Friend", x=4, y=4, team="green", move=2)]
+game.board[4][4].occupant = game.others[0]
+print("Test 3: Enemy on edge of range")
+targets = game.find_targets("green")
+for key, values in targets.items():
+    for value in values:
+        print(f"{key.name}: {value[0].name}, {value[1]}")
+
+# # Test 4: Enemy with only one reachable node
+# game = GameBoard()
+# game.enemies = [Character(name="Red Enemy", x=1, y=1, team="red", move=1)]
+# game.board[1][1].occupant = game.enemies[0]
+# game.others = [Character(name="Green Friend", x=3, y=1, team="green", move=2)]
+# game.board[3][1].occupant = game.others[0]
+# print("Test 4: Enemy with only one reachable node")
+# targets = game.find_targets("green")
+# for key, values in targets.items():
+#     for value in values:
+#         print(f"{key.name}: {value[0].name}, {value[1]}")
+
+
+
