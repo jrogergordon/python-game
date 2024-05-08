@@ -1,0 +1,15 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 10px;
+}
+
+.cell {
+    background-color: #eee;
+    padding: 20px;
+    border: 1px solid #ddd;
+}
+
+.highlighted {
+    border: 2px solid black;
+}
