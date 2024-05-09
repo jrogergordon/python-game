@@ -155,49 +155,6 @@ class TestGameBoard(unittest.TestCase):
         menu_options = self.game_board.stop_move_open_menu(4, 4)
         self.assertEqual(menu_options, ["Wait", "Rescue", "Fight", "Shove"])
 
-    def test_scan_area_valid_location(self):
-        # Set up a character at location (2, 2) with move distance 1
-        self.game_board.board[2][2].occupant = Character(move=1, team="red")
-        self.game_board.scan_area((2, 2))
-        # Check that nodes within move distance have been updated
-        self.assertEqual(self.game_board.board[2][1].show, "")
-        self.assertEqual(self.game_board.board[2][3].show, "")
-        self.assertEqual(self.game_board.board[1][2].show, "")
-        self.assertEqual(self.game_board.board[3][2].show, "")
-
-        # Check that other nodes have not been updated
-        self.assertEqual(self.game_board.board[0][0].show, "\u265E")
-
-    def test_scan_area_invalid_location(self):
-        # Try scanning an area outside the board
-        with self.assertRaises(ValueError):
-            self.game_board.scan_area((-1, -1))
-
-    def test_scan_area_no_character(self):
-        # Try scanning an area with no character
-        with self.assertRaises(ValueError):
-            self.game_board.scan_area((2, 2))
-
-    def test_scan_area_different_teams(self):
-        # Set up characters of different teams
-        self.game_board.board[2][2].occupant = Character(move=1, team="red")
-        self.game_board.board[2][1].occupant = Character(team="blue")
-        self.game_board.board[2][3].occupant = Character(team="yellow")
-        self.game_board.scan_area((2, 2))
-        # Check that nodes have been updated correctly
-        self.assertEqual(self.game_board.board[2][1].show, "")
-        self.assertEqual(self.game_board.board[2][3].show, "")
-
-    def test_scan_area_occupant_types(self):
-        # Set up different occupant types
-        self.game_board.board[2][2].occupant = Character(move=1, team="red")
-        self.game_board.board[2][1].occupant = 0
-        self.game_board.board[2][3].occupant = 1
-        self.game_board.scan_area((2, 2))
-        # Check that nodes have been updated correctly
-        self.assertEqual(self.game_board.board[2][1].show, "")
-        self.assertEqual(self.game_board.board[2][3].show, "")
-
     def test_fight_no_weapons(self):
         character1 = Character(strength=10, defense=5, health=100)
         character2 = Character(strength=8, defense=3, health=100)
@@ -238,6 +195,59 @@ class TestGameBoard(unittest.TestCase):
         self.game_board.fight(character1, character2)
         self.assertEqual(character1.health, 97)  # 100 - (8 - 5)
         self.assertEqual(character2.health, 86)  # 100 - (10 - 3) * 2
+
+    def test_find_targets_enemy_in_range(self):
+        self.game_board.enemies = [Character(name="Red Enemy", x=1, y=1, team="red", move=1, health=100, strength=50, defense=10)]
+        self.game_board.board[1][1].occupant = self.game_board.enemies[0]
+        self.game_board.others = [Character(name="Green Friend", x=2, y=2, team="green", move=2, health=100, strength=50, defense=10)]
+        self.game_board.board[2][2].occupant = self.game_board.others[0]
+        targets = self.game_board.find_targets("green")
+        for key, values in targets.items():
+            for value in values:
+                self.assertEqual(key.name, "Green Friend")
+                self.assertEqual(value[0].name, "Red Enemy")
+                self.assertEqual(value[1], 40)
+                self.assertEqual(value[2], [(2, 1), (1, 2)])
+
+    def test_find_targets_enemy_out_of_range(self):
+        self.game_board.enemies = [Character(name="Red Enemy", x=1, y=1, team="red", move=1, health=100, strength=50, defense=10)]
+        self.game_board.board[1][1].occupant = self.game_board.enemies[0]
+        self.game_board.others = [Character(name="Green Friend", x=4, y=4, team="green", move=2, health=100, strength=50, defense=10)]
+        self.game_board.board[4][4].occupant = self.game_board.others[0]
+        targets = self.game_board.find_targets("green")
+        for key, values in targets.items():
+            for value in values:
+                self.assertEqual(key.name, "Green Friend")
+                self.assertEqual(value[0].name, "Red Enemy")
+                self.assertEqual(value[1], 40)
+                self.assertEqual(value[2], [])
+
+    def test_find_targets_enemy_on_edge_of_range(self):
+        self.game_board.enemies = [Character(name="Red Enemy", x=4, y=1, team="red", move=1, health=100, strength=50, defense=10)]
+        self.game_board.board[1][4].occupant = self.game_board.enemies[0]
+        self.game_board.others = [Character(name="Green Friend", x=4, y=4, team="green", move=2, health=100, strength=50, defense=10)]
+        self.game_board.board[4][4].occupant = self.game_board.others[0]
+        targets = self.game_board.find_targets("green")
+        for key, values in targets.items():
+            for value in values:
+                self.assertEqual(key.name, "Green Friend")
+                self.assertEqual(value[0].name, "Red Enemy")
+                self.assertEqual(value[1], 40)
+                self.assertEqual(value[2], [(4, 2)])
+
+    def test_find_targets_enemy_with_only_one_reachable_node(self):
+        self.game_board.enemies = [Character(name="Red Enemy", x=1, y=1, team="red", move=1, health=100, strength=50, defense=10)]
+        self.game_board.board[1][1].occupant = self.game_board.enemies[0]
+        self.game_board.others = [Character(name="Green Friend", x=3, y=1, team="green", move=2, health=100, strength=50, defense=10)]
+        self.game_board.board[1][3].occupant = self.game_board.others[0]
+        targets = self.game_board.find_targets("green")
+        for key, values in targets.items():
+            for value in values:
+                self.assertEqual(key.name, "Green Friend")
+                self.assertEqual(value[0].name, "Red Enemy")
+                self.assertEqual(value[1], 40)
+                self.assertEqual(value[2], [(2, 1)])
+
 
 if __name__ == '__main__':
     unittest.main()

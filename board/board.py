@@ -12,6 +12,19 @@ class GameBoard:
         self.enemies = enemies
         self.others = other
         self.ally = ally
+        self.highlighted_cell = 0
+
+    def move_up(self):
+        self.highlighted_cell = (self.highlighted_cell - 9) % 81
+
+    def move_down(self):
+        self.highlighted_cell = (self.highlighted_cell + 9) % 81
+
+    def move_left(self):
+        self.highlighted_cell = (self.highlighted_cell - 1) % 81
+
+    def move_right(self):
+        self.highlighted_cell = (self.highlighted_cell + 1) % 81
 
     def create_board(self):
         board = []
@@ -45,60 +58,6 @@ class GameBoard:
             raise ValueError("Coordinate out of bounds")
         self.board[x][y] = piece
 
-    def fight(self, character1, character2):
-        # Check if either character has a weapon equipped
-        weapon1 = character1.equipped
-        weapon2 = character2.equipped
-
-        # Calculate damage for each character
-        damage1 = character1.strength - character2.defense
-        damage2 = character2.strength - character1.defense
-
-        # Add weapon strength to damage if applicable
-        if weapon1 and not weapon1.broken:
-            damage1 += weapon1.strength
-        if weapon2 and not weapon2.broken:
-            damage2 += weapon2.strength
-
-        # Check if character 1 can attack twice
-        if character1.speed >= character2.speed + 4:
-            num_attacks1 = 2
-        else:
-            num_attacks1 = 1
-
-        # Check if character 2 can attack twice
-        if character2.speed >= character1.speed + 4:
-            num_attacks2 = 2
-        else:
-            num_attacks2 = 1
-
-        # Perform attacks
-        for _ in range(num_attacks1):
-            if weapon1 and weapon1.usage == 0:
-                break
-            if damage1 > 0:
-                if damage1 > character2.health:
-                    character2.health = 0
-                else:
-                    character2.change_health(-damage1)
-            if weapon1:
-                weapon1.usage -= 1
-                if weapon1.usage < 0:
-                    weapon1.usage = 0
-
-        for _ in range(num_attacks2):
-            if weapon2 and weapon2.usage == 0:
-                break
-            if damage2 > 0:
-                if damage2 > character1.health:
-                    character1.health = 0
-                else:
-                    character1.change_health(-damage2)
-            if weapon2:
-                weapon2.usage -= 1
-                if weapon2.usage < 0:
-                    weapon2.usage = 0
-
     def a_star(self, start, goal):
         moves = start.occupant.move
         open_list = [start]
@@ -112,7 +71,7 @@ class GameBoard:
             current = min(open_list, key=lambda node: f_score[node])
             if current == goal:
                 path = self.reconstruct_path(came_from, current)
-                return path if len(path) <= moves else False
+                return path if len(path) <= moves + 1 else False
 
             open_list.remove(current)
             for neighbor in self.get_neighbors(current):
@@ -167,33 +126,6 @@ class GameBoard:
 
         return menu_options
 
-    def scan_area(self, location):
-        x, y = location
-        if not isinstance(self.board[y][x].occupant, Character):
-            raise ValueError("Location is not a character")
-        character = self.board[y][x].occupant
-        move_distance = character.move
-
-        min_x = max(0, x - move_distance)
-        max_x = min(len(self.board) - 1, x + move_distance)
-        min_y = max(0, y - move_distance)
-        max_y = min(len(self.board[0]) - 1, y + move_distance)
-
-        for j in range(min_x, max_x + 1):
-            for i in range(min_y, max_y + 1):
-                node = self.board[i][j]
-
-                if isinstance(node.occupant, Character):
-                    if node.occupant.team == "red":
-                        node.show = ""
-                    elif node.occupant.team == "blue":
-                        node.show = ""
-                    elif node.occupant.team == "yellow":
-                        node.show = ""
-                elif node.occupant == 0:
-                    node.show = ""
-                elif node.occupant == 1:
-                    node.show = ""
 
     def find_targets(self, team):
         if team == "green":
@@ -207,71 +139,126 @@ class GameBoard:
         
         for unit in group:
             unit_scanned = []
-            for x in range(max(0, unit.x - unit.move), min(9, unit.x + unit.move + 1)):
-                for y in range(max(0, unit.y - unit.move), min(9, unit.y + unit.move + 1)):
-                    if x == 4 and y == 1: print("made it")
-                    if abs(x - unit.x) + abs(y - unit.y) <= unit.move:
+            for x in range(max(0, unit.x - unit.move - 1), min(9, unit.x + unit.move + 1)):
+                for y in range(max(0, unit.y - unit.move - 1), min(9, unit.y + unit.move + 1)):
+                    if abs(x - unit.x) + abs(y - unit.y) <= unit.move + 1:
                         node = self.board[y][x]
-                        if node.occupant and isinstance(node.occupant, Character) and ((team in ["yellow", "green"] and node.occupant.team == "red") or (team == "red" and node.occupant.team != team)):
+                        if node.occupant and isinstance(node.occupant, Character) and ((team in ["yellow", "green"] and node.occupant.team == "red") 
+                        or (team == "red" and node.occupant.team != team)):
+                            predicted_damage = self.predict_fight(unit, node.occupant)
                             adjacent_nodes = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
                             reachable_nodes = []
                             for adj_x, adj_y in adjacent_nodes:
                                 if 0 <= adj_x < 9 and 0 <= adj_y < 9:
-                                    if self.a_star(self.board[unit.y][unit.x], self.board[adj_y][adj_x]):
-                                        reachable_nodes.append((adj_y, adj_x))
+                                    if self.a_star(self.board[unit.y][unit.x], self.board[adj_y][adj_x]):                                      
+                                        reachable_nodes.append((adj_x, adj_y))
                             if reachable_nodes:
-                                unit_scanned.append([node.occupant, reachable_nodes])
+                                unit_scanned.append([node.occupant, predicted_damage, reachable_nodes])
             scanned_nodes[unit] = unit_scanned
 
         return scanned_nodes
+
     
-# Test 1: Enemy in range
-game = GameBoard()
-game.enemies = [Character(name="Red Enemy", x=1, y=1, team="red", move=1)]
-game.board[1][1].occupant = game.enemies[0]
-game.others = [Character(name="Green Friend", x=2, y=2, team="green", move=2)]
-game.board[2][2].occupant = game.others[0]
-print("Test 1: Enemy in range")
-targets = game.find_targets("green")
-for key, values in targets.items():
-    for value in values:
-        print(f"{key.name}: {value[0].name}, {value[1]}")
+    def predict_fight(self, character1, character2):
+        # Check if either character has a weapon equipped
+        weapon1 = character1.equipped
 
-# Test 2: Enemy out of range
-game = GameBoard()
-game.enemies = [Character(name="Red Enemy", x=1, y=1, team="red", move=1)]
-game.board[1][1].occupant = game.enemies[0]
-game.others = [Character(name="Green Friend", x=4, y=4, team="green", move=2)]
-game.board[4][4].occupant = game.others[0]
-print("Test 2: Enemy out of range")
-targets = game.find_targets("green")
-for key, values in targets.items():
-    for value in values:
-        print(f"{key.name}: {value[0].name}, {value[1]}")
+        # Calculate damage for character1
+        damage1 = character1.strength - character2.defense
 
-# Test 3: Enemy on edge of range
-game = GameBoard()
-game.enemies = [Character(name="Red Enemy", x=4, y=1, team="red", move=1)]
-game.board[1][4].occupant = game.enemies[0]
-game.others = [Character(name="Green Friend", x=4, y=4, team="green", move=2)]
-game.board[4][4].occupant = game.others[0]
-print("Test 3: Enemy on edge of range")
-targets = game.find_targets("green")
-for key, values in targets.items():
-    for value in values:
-        print(f"{key.name}: {value[0].name}, {value[1]}")
+        # Add weapon strength to damage if applicable
+        if weapon1 and not weapon1.broken:
+            damage1 += weapon1.strength
 
-# # Test 4: Enemy with only one reachable node
-# game = GameBoard()
-# game.enemies = [Character(name="Red Enemy", x=1, y=1, team="red", move=1)]
-# game.board[1][1].occupant = game.enemies[0]
-# game.others = [Character(name="Green Friend", x=3, y=1, team="green", move=2)]
-# game.board[3][1].occupant = game.others[0]
-# print("Test 4: Enemy with only one reachable node")
-# targets = game.find_targets("green")
-# for key, values in targets.items():
-#     for value in values:
-#         print(f"{key.name}: {value[0].name}, {value[1]}")
+        # Check if character 1 can attack twice
+        if character1.speed >= character2.speed + 4:
+            num_attacks1 = 2
+        else:
+            num_attacks1 = 1
+
+        # Predict damage
+        predicted_damage = damage1 * num_attacks1
+
+        return predicted_damage
+    
+    def fight(self, character1, character2):
+        # Check if either character has a weapon equipped
+        weapon1 = character1.equipped
+        weapon2 = character2.equipped
+
+        # Calculate damage for each character
+        damage1 = character1.strength - character2.defense
+        damage2 = character2.strength - character1.defense
+
+        # Add weapon strength to damage if applicable
+        if weapon1 and not weapon1.broken:
+            damage1 += weapon1.strength
+        if weapon2 and not weapon2.broken:
+            damage2 += weapon2.strength
+
+        # Check if character 1 can attack twice
+        if character1.speed >= character2.speed + 4:
+            num_attacks1 = 2
+        else:
+            num_attacks1 = 1
+
+        # Check if character 2 can attack twice
+        if character2.speed >= character1.speed + 4:
+            num_attacks2 = 2
+        else:
+            num_attacks2 = 1
+
+        # Perform attacks
+        for _ in range(num_attacks1):
+            if weapon1 and weapon1.usage == 0:
+                break
+            if damage1 > 0:
+                if damage1 > character2.health:
+                    character2.health = 0
+                else:
+                    character2.change_health(-damage1)
+            if weapon1:
+                weapon1.usage -= 1
+                if weapon1.usage < 0:
+                    weapon1.usage = 0
+
+        for _ in range(num_attacks2):
+            if weapon2 and weapon2.usage == 0:
+                break
+            if damage2 > 0:
+                if damage2 > character1.health:
+                    character1.health = 0
+                else:
+                    character1.change_health(-damage2)
+            if weapon2:
+                weapon2.usage -= 1
+                if weapon2.usage < 0:
+                    weapon2.usage = 0
+
+    def calculate_hit_likelihood(character1, character2):
+        weapon1 = character1.equipped
+        weapon2 = character2.equipped
+
+        # Calculate hit likelihood for character 1
+        char1_speed_factor = character1.speed * 0.04  # Weigh character speed more heavily
+        char1_skill_factor = character1.skill * 0.08  # Weigh character skill more
+        weapon1_speed_factor = weapon1.speed * 0.01 if weapon1 else 0  # Weigh weapon speed half of character speed
+        weapon1_weight_factor = weapon1.weight * -0.0025 if weapon1 else 0  # Weigh weapon weight the least
+        char2_dodge_factor = character2.speed * -0.03  # Higher character2 speed reduces character1 hit chance
+        char1_hit_likelihood = char1_speed_factor + char1_skill_factor + weapon1_speed_factor + weapon1_weight_factor + char2_dodge_factor
+        char1_hit_likelihood = max(0, min(1, char1_hit_likelihood))  # Ensure value is between 0 and 1
+
+        # Calculate hit likelihood for character 2
+        char2_speed_factor = character2.speed * 0.04
+        char2_skill_factor = character2.skill * 0.08
+        weapon2_speed_factor = weapon2.speed * 0.01 if weapon2 else 0
+        weapon2_weight_factor = weapon2.weight * -0.0025 if weapon2 else 0
+        char1_dodge_factor = character1.speed * -0.03
+        char2_hit_likelihood = char2_speed_factor + char2_skill_factor + weapon2_speed_factor + weapon2_weight_factor + char1_dodge_factor
+        char2_hit_likelihood = max(0, min(1, char2_hit_likelihood))  # Ensure value is between 0 and 1
+
+        return char1_hit_likelihood, char2_hit_likelihood
+    
 
 
 
