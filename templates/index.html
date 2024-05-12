@@ -1,17 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>My Game</title>
-    <link rel="stylesheet" href="../styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
-    <div class="grid">
-        <div class="cell" id="cell-0"></div>
-        <div class="cell" id="cell-1"></div>
+    <div class="grid-container">
+        <div class="dropdown" style="position: absolute; top: 0; right: 0;">
+         <button class="dropbtn">Grid Line Intensity</button>
+            <div class="dropdown-content">
+                <a href="#" data-border-intensity="0">No Border</a>
+                <a href="#" data-border-intensity="1">Some Border</a>
+             <a href="#" data-border-intensity="2">Max Border</a>
+            </div>
+        </div>
+        <div class="grid">
+            {% for row in game_board %}
+            {% set outer_index = loop.index0 %}
+            {% for node in row %}
+            <div class="cell" data-row="{{ outer_index }}" data-col="{{ loop.index0 }}">
+                {% if node.occupant != 0 %}
+                {{ node.occupant.show }}
+                {% else %}
+                {{ node.show }}
+                {% endif %}
+            </div>
+            {% endfor %}
+            {% endfor %}
+        </div>
+
     </div>
-    <script src="../script.js"></script>
+    
+    <div class="right-rectangle"></div>
+    <div class="bottom-rectangle">
+        <div class="bottom-rectangle-text" id="highlighted-node-show"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
 </html>

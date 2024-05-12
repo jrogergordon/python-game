@@ -1,0 +1,142 @@
+.grid {
+    width: 14vw;
+    height: 14vw;
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    overflow-y: hidden;
+    /* prevents the grid from affecting the scroll bar */
+}
+
+.cell {
+    background-color: white;
+    /* padding: 0px; */
+    border: 1px solid black;
+    aspect-ratio: 1;
+    /* make cells square */
+}
+
+.cell {
+    width: calc(11vw / {
+                {
+                game_board[0]|length
+            }
+        }
+
+        / 2);
+    /* sets the width of each cell to half its original size */
+    height: calc(11vw / {
+                {
+                game_board|length
+            }
+        }
+
+        / 2);
+    /* sets the height of each cell to half its original size */
+    text-align: center;
+    /* centers the content of each cell */
+    margin: 0;
+    padding: 0;
+}
+
+.highlighted {
+    background-image: url("/static/assets/highlighted.png");
+    background-size: cover;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+
+.bottom-rectangle-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.bottom-rectangle {
+    position: absolute;
+    bottom: 0;
+    /* Position at the bottom of the grid */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    height: 10vh;
+    background-color: #f0f0f0;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    z-index: -1;
+}
+
+.right-rectangle {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    /* Position at the right of the grid */
+    transform: translateY(-50%);
+    width: 10vw;
+    height: 30vh;
+    background-color: #f0f0f0;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    z-index: -1;
+}
+
+.grid {
+    position: relative;
+    /* Make the grid a relative positioned element */
+    width: 14vw;
+    height: 14vw;
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    overflow-y: hidden;
+    /* prevents the grid from affecting the scroll bar */
+}
+
+.blue {
+    background-image: url("/static/assets/blue.png");
+    background-size: cover;
+}
+
+.orange {
+    background-image: url("/static/assets/orange.png");
+    background-size: cover;
+}
+
+.dropdown {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+}

@@ -12,19 +12,26 @@ class GameBoard:
         self.enemies = enemies
         self.others = other
         self.ally = ally
-        self.highlighted_cell = 0
+        self.highlighted_cell = [0, 0]
+
+    def update_highlighted_cell(self, row, col):
+        self.highlighted_cell = [row, col]
 
     def move_up(self):
-        self.highlighted_cell = (self.highlighted_cell - 9) % 81
+        if self.highlighted_cell[0] > 0:
+            self.highlighted_cell[0] -= 1
 
     def move_down(self):
-        self.highlighted_cell = (self.highlighted_cell + 9) % 81
+        if self.highlighted_cell[0] < 8:
+            self.highlighted_cell[0] += 1
 
     def move_left(self):
-        self.highlighted_cell = (self.highlighted_cell - 1) % 81
+        if self.highlighted_cell[1] > 0:
+            self.highlighted_cell[1] -= 1
 
     def move_right(self):
-        self.highlighted_cell = (self.highlighted_cell + 1) % 81
+        if self.highlighted_cell[1] < 8:
+            self.highlighted_cell[1] += 1
 
     def create_board(self):
         board = []
@@ -235,26 +242,24 @@ class GameBoard:
                 if weapon2.usage < 0:
                     weapon2.usage = 0
 
-    def calculate_hit_likelihood(character1, character2):
+    def calculate_hit_likelihood(self, character1, character2):
         weapon1 = character1.equipped
         weapon2 = character2.equipped
 
         # Calculate hit likelihood for character 1
-        char1_speed_factor = character1.speed * 0.04  # Weigh character speed more heavily
-        char1_skill_factor = character1.skill * 0.08  # Weigh character skill more
-        weapon1_speed_factor = weapon1.speed * 0.01 if weapon1 else 0  # Weigh weapon speed half of character speed
-        weapon1_weight_factor = weapon1.weight * -0.0025 if weapon1 else 0  # Weigh weapon weight the least
-        char2_dodge_factor = character2.speed * -0.03  # Higher character2 speed reduces character1 hit chance
-        char1_hit_likelihood = char1_speed_factor + char1_skill_factor + weapon1_speed_factor + weapon1_weight_factor + char2_dodge_factor
+        char1_skill_factor = character1.skill * 0.04  # Weigh character skill heavily
+        char1_speed_factor = character1.speed * 0.0225  # Weigh character speed moderately
+        weapon1_weight_factor = weapon1.weight * -0.0075 if weapon1 else 0  # Weigh weapon weight lightly negatively
+        char2_dodge_factor = character2.speed * -0.015  # Higher character2 speed reduces character1 hit chance
+        char1_hit_likelihood = char1_skill_factor + char1_speed_factor + weapon1_weight_factor + char2_dodge_factor
         char1_hit_likelihood = max(0, min(1, char1_hit_likelihood))  # Ensure value is between 0 and 1
 
         # Calculate hit likelihood for character 2
-        char2_speed_factor = character2.speed * 0.04
-        char2_skill_factor = character2.skill * 0.08
-        weapon2_speed_factor = weapon2.speed * 0.01 if weapon2 else 0
-        weapon2_weight_factor = weapon2.weight * -0.0025 if weapon2 else 0
-        char1_dodge_factor = character1.speed * -0.03
-        char2_hit_likelihood = char2_speed_factor + char2_skill_factor + weapon2_speed_factor + weapon2_weight_factor + char1_dodge_factor
+        char2_skill_factor = character2.skill * 0.04
+        char2_speed_factor = character2.speed * 0.0225
+        weapon2_weight_factor = weapon2.weight * -0.0075 if weapon2 else 0
+        char1_dodge_factor = character1.speed * -0.015
+        char2_hit_likelihood = char2_skill_factor + char2_speed_factor + weapon2_weight_factor + char1_dodge_factor
         char2_hit_likelihood = max(0, min(1, char2_hit_likelihood))  # Ensure value is between 0 and 1
 
         return char1_hit_likelihood, char2_hit_likelihood

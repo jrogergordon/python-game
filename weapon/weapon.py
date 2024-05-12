@@ -1,10 +1,11 @@
 class Weapon:
-    def __init__(self, name="sword", usage=50, speed=5, strength=10, broken=0):
+    def __init__(self, name="sword", usage=50, speed=5, strength=10, broken=0, weight=1):
         self.name = name
         self.usage = usage
         self.speed = speed
         self.strength = strength
         self.broken = broken
+        self.weight = weight
 
     def check_condition(self):
         if self.usage == 0:

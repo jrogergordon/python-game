@@ -248,6 +248,57 @@ class TestGameBoard(unittest.TestCase):
                 self.assertEqual(value[1], 40)
                 self.assertEqual(value[2], [(2, 1)])
 
+    def test_equal_characters(self):
+        character1 = Character()
+        character2 = Character()
+        weapon1 = Weapon()
+        weapon2 = Weapon()
+        character1.equipped = weapon1
+        character2.equipped = weapon2
+        likelihood1, likelihood2 = self.game_board.calculate_hit_likelihood(character1, character2)
+        self.assertAlmostEqual(likelihood1, 0.0675)
+        self.assertAlmostEqual(likelihood2, 0.0675)
+
+    def test_character_with_higher_skill(self):
+        character1 = Character(skill=20)
+        character2 = Character()
+        weapon1 = Weapon()
+        weapon2 = Weapon()
+        character1.equipped = weapon1
+        character2.equipped = weapon2
+        likelihood1, likelihood2 = self.game_board.calculate_hit_likelihood(character1, character2)
+        self.assertGreater(likelihood1, likelihood2)
+
+    def test_character_with_higher_speed(self):
+        character1 = Character(speed=20)
+        character2 = Character()
+        weapon1 = Weapon()
+        weapon2 = Weapon()
+        character1.equipped = weapon1
+        character2.equipped = weapon2
+        likelihood1, likelihood2 = self.game_board.calculate_hit_likelihood(character1, character2)
+        self.assertGreater(likelihood1, likelihood2)
+
+    def test_weapon_with_higher_speed(self):
+        character1 = Character()
+        character2 = Character()
+        weapon1 = Weapon(speed=10)
+        weapon2 = Weapon()
+        character1.equipped = weapon1
+        character2.equipped = weapon2
+        likelihood1, likelihood2 = self.game_board.calculate_hit_likelihood(character1, character2)
+        self.assertEqual(likelihood1, likelihood2)  # Corrected: weapon speed is not considered in hit likelihood
+
+    def test_character_with_lower_weight_weapon(self):
+        character1 = Character()
+        character2 = Character()
+        weapon1 = Weapon(weight=0)
+        weapon2 = Weapon(weight=5)
+        character1.equipped = weapon1
+        character2.equipped = weapon2
+        likelihood1, likelihood2 = self.game_board.calculate_hit_likelihood(character1, character2)
+        self.assertGreater(likelihood1, likelihood2)
+
 
 if __name__ == '__main__':
     unittest.main()
