@@ -264,6 +264,11 @@ class GameBoard:
 
         return char1_hit_likelihood, char2_hit_likelihood
     
+    def calculate_expected_damage(self, character1, character2):
+        predicted_damage = self.predict_fight(character1, character2)
+        hit_likelihood, _ = self.calculate_hit_likelihood(character1, character2)
+        expected_damage = predicted_damage * hit_likelihood
+        return expected_damage
 
 
 
