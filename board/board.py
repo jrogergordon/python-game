@@ -171,7 +171,7 @@ class GameBoard:
         weapon1 = character1.equipped
 
         # Calculate damage for character1
-        damage1 = character1.strength - character2.defense
+        damage1 = character1.strength - character2.defense 
 
         # Add weapon strength to damage if applicable
         if weapon1 and not weapon1.broken:
