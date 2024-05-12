@@ -166,7 +166,7 @@ class GameBoard:
         return scanned_nodes
 
     
-    def predict_fight(self, character1, character2):
+    def predict_fight(self, character1, character2): 
         # Check if either character has a weapon equipped
         weapon1 = character1.equipped
 
