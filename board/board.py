@@ -156,7 +156,7 @@ class GameBoard:
                             adjacent_nodes = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
                             reachable_nodes = []
                             for adj_x, adj_y in adjacent_nodes:
-                                if 0 <= adj_x < 9 and 0 <= adj_y < 9:
+                                if 0 <= adj_x < 9 and 0 <= adj_y < 9: 
                                     if self.a_star(self.board[unit.y][unit.x], self.board[adj_y][adj_x]):                                      
                                         reachable_nodes.append((adj_x, adj_y))
                             if reachable_nodes:
