@@ -1,8 +1,10 @@
 import sys
-sys.path.append('/mnt/c/Users/jroge/OneDrive/Desktop/python_game/') 
+sys.path.append('/home/jrogergordon/python_game/') 
 
+# Now you can import modules from the root directory
 from mapNode.map_node import board_node
 from character.character import Character
+
 
 class GameBoard:
     def __init__(self, max=9, players=[], enemies=[], other=[], ally=[]):
@@ -264,11 +266,19 @@ class GameBoard:
 
         return char1_hit_likelihood, char2_hit_likelihood
     
-    def calculate_expected_damage(self, character1, character2):
+    def calculate_expected_fight_value (self, character1, character2):
         predicted_damage = self.predict_fight(character1, character2)
         hit_likelihood, _ = self.calculate_hit_likelihood(character1, character2)
         expected_damage = predicted_damage * hit_likelihood
         return expected_damage
 
+    def find_enemies_in_range2(self, teamA):
+        enemy_map = {}
+        teamB = self.enemies if teamA != 'enemies' else self.others + self.ally + self.players
+        teamA_members = getattr(self, teamA)
+        print(teamA_members)
+
+game= GameBoard()
+game.find_enemies_in_range2('other')
 
 

@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/mnt/c/Users/jroge/OneDrive/Desktop/python_game/') 
+sys.path.append('/home/jrogergordon/python_game/')
 
 from board.board import GameBoard
 from character.character import Character
