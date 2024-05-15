@@ -118,4 +118,23 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+
+    let imageIndex = 0;
+    const imageDiv = document.querySelector('.image-div');
+    const imageButton = document.getElementById('image-button');
+
+    imageButton.addEventListener('click', () => {
+        imageIndex++;
+        if (imageIndex > 9) {
+            imageIndex = 0;
+            imageDiv.classList.remove('visible');
+        } else {
+            imageDiv.classList.add('visible');
+            if (imageIndex === 1) {
+                imageDiv.style.background = 'none'; /* remove background color on first click */
+            }
+            const imageName = `example${(imageIndex % 3) + 1}.png`;
+            imageDiv.style.backgroundImage = `url('/static/assets/${imageName}')`;
+        }
+    });
 });

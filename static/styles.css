@@ -140,3 +140,46 @@ body {
 .dropdown:hover .dropbtn {
     background-color: #3e8e41;
 }
+
+.image-div {
+    position: absolute;
+    bottom: 10vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10vw;
+    height: 10vh;
+    background-color: #ff0000;
+    /* added for testing */
+    background-size: cover;
+    background-position: center;
+    display: block;
+    /* changed from none to block */
+    z-index: 1000;
+    /* increased z-index to ensure it's on top */
+    overflow: visible;
+    /* added to ensure it's not cut off */
+}
+
+.image-div.visible {
+    display: block;
+}
+
+#image-button {
+    position: absolute;
+    bottom: 2vh;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: #fff;
+    cursor: pointer;
+    z-index: 2;
+    /* added to ensure button is not covered */
+}
+
+#image-button:hover {
+    background-color: #3e8e41;
+}

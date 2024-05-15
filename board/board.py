@@ -272,13 +272,4 @@ class GameBoard:
         expected_damage = predicted_damage * hit_likelihood
         return expected_damage
 
-    def find_enemies_in_range2(self, teamA):
-        enemy_map = {}
-        teamB = self.enemies if teamA != 'enemies' else self.others + self.ally + self.players
-        teamA_members = getattr(self, teamA)
-        print(teamA_members)
-
-game= GameBoard()
-game.find_enemies_in_range2('other')
-
 
