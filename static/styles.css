@@ -54,15 +54,23 @@ body {
 
 .bottom-rectangle-text {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    /* Position at the top of the right rectangle */
+    left: 0;
+    /* Position at the left of the right rectangle */
+    width: 100%;
+    /* Set the width to the full width of the right rectangle */
+    height: 100%;
+    /* Set the height to the full height of the right rectangle */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
 }
 
 .bottom-rectangle {
     position: absolute;
-    bottom: 0;
+    bottom: 10vh;
     /* Position at the bottom of the grid */
     left: 50%;
     transform: translateX(-50%);
@@ -78,6 +86,7 @@ body {
     top: 50%;
     right: 0;
     /* Position at the right of the grid */
+    left: 60vw;
     transform: translateY(-50%);
     width: 10vw;
     height: 30vh;
@@ -141,35 +150,37 @@ body {
     background-color: #3e8e41;
 }
 
+
 .image-div {
     position: absolute;
-    bottom: 10vh;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 20vh;
+    /* moved down */
+    left: 10vw;
+    /* moved to the left */
     width: 10vw;
-    height: 10vh;
-    background-color: #ff0000;
-    /* added for testing */
-    background-size: cover;
-    background-position: center;
-    display: block;
-    /* changed from none to block */
-    z-index: 1000;
-    /* increased z-index to ensure it's on top */
+    height: 20vh;
+    /* made taller */
+    background-color: #d7d0d0;
     overflow: visible;
-    /* added to ensure it's not cut off */
+    z-index: 1000;
 }
 
-.image-div.visible {
-    display: block;
+.image-div img.talking-image {
+    max-width: 100%;
+    /* Ensures the image won't exceed the container width */
+    max-height: 100%;
+    /* Ensures the image won't exceed the container height */
+    object-fit: contain;
+    /* Scales the image to fit the container while maintaining aspect ratio */
 }
 
 #image-button {
     position: absolute;
     bottom: 2vh;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
+    right: 2vw;
+    /* moved to the bottom right of the bottom div */
+    padding: 15px 30px;
+    /* made a little bigger */
     font-size: 16px;
     border: none;
     border-radius: 5px;
@@ -177,9 +188,10 @@ body {
     color: #fff;
     cursor: pointer;
     z-index: 2;
-    /* added to ensure button is not covered */
 }
 
-#image-button:hover {
-    background-color: #3e8e41;
+#image-button::after {
+    content: '>>';
+    /* added two arrows to the button */
+    margin-left: 10px;
 }

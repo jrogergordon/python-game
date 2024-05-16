@@ -119,22 +119,52 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    let imageIndex = 0;
-    const imageDiv = document.querySelector('.image-div');
+
+    let dialogueIndex = 0;
+    let dialogueTexts = [];
+    let currentSpeaker = '';
+
+    fetch('/static/assets/dialogue_test.txt')
+        .then(response => response.text())
+        .then(data => {
+            dialogueTexts = data.split('\n');
+        });
+
+    const dialogueDiv = document.querySelector('.dialogue_text');
+    const talkingImageDiv = document.querySelector('.image-div');
+    const talkingImage = talkingImageDiv.querySelector('img.talking-image');
     const imageButton = document.getElementById('image-button');
 
+    function displaySpeakerImage(speaker) {
+        const imageName = `${speaker}Talking.png`;
+        talkingImage.src = `/static/assets/${imageName}`;
+    }
+
     imageButton.addEventListener('click', () => {
-        imageIndex++;
-        if (imageIndex > 9) {
-            imageIndex = 0;
-            imageDiv.classList.remove('visible');
-        } else {
-            imageDiv.classList.add('visible');
-            if (imageIndex === 1) {
-                imageDiv.style.background = 'none'; /* remove background color on first click */
+        if (dialogueIndex < dialogueTexts.length) {
+            const dialogueLine = dialogueTexts[dialogueIndex];
+            if (dialogueLine.startsWith('currentSpeaker:')) {
+                currentSpeaker = dialogueLine.split(':')[1].trim();
+                dialogueDiv.innerHTML = '';
+                const speakerLine = document.createElement('div');
+                speakerLine.textContent = currentSpeaker;
+                speakerLine.style.position = 'absolute';
+                speakerLine.style.top = '50%';
+                speakerLine.style.left = '50%';
+                speakerLine.style.transform = 'translate(-50%, -50%)';
+                speakerLine.style.fontSize = 'larger';
+                speakerLine.style.fontWeight = 'bold';
+                dialogueDiv.appendChild(speakerLine);
+                displaySpeakerImage(currentSpeaker);
+            } else {
+                if (dialogueDiv.children.length > 4) {
+                    dialogueDiv.removeChild(dialogueDiv.children[1]);
+                }
+                const newLine = document.createElement('div');
+                newLine.textContent = dialogueLine;
+                dialogueDiv.appendChild(newLine);
             }
-            const imageName = `example${(imageIndex % 3) + 1}.png`;
-            imageDiv.style.backgroundImage = `url('/static/assets/${imageName}')`;
+            dialogueIndex++;
         }
     });
 });
