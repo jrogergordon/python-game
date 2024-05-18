@@ -5,16 +5,16 @@ from board.board import GameBoard
 from character.character import Character
 
 test_board = GameBoard()
-ike = Character(show='\u2600')
+ike = Character(show='\u2600', name="Ike")
 ix, iy = 0, 0
 
-boyd = Character(show='\u2609')
+boyd = Character(show='\u2609', name="Boyd")
 bx, by = 8, 8
 
-rolf = Character(show='\u2610')
+rolf = Character(show='\u2610', name="Rolf")
 rx, ry = 0, 8
 
-mist = Character(show='\u2629')
+mist = Character(show='\u2629', name="Mist")
 mx, my = 8, 0
 
 

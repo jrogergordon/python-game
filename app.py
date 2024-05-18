@@ -1,5 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 from board.test_match import test_board
+from character.character import Character
 game_board = test_board
 
 app = Flask(__name__)
@@ -62,6 +63,25 @@ def get_reachable_cells():
         return jsonify({'reachable_cells': reachable_cells, 'edge_cells': edge_cells})
     else:
         return jsonify({'reachable_cells': [], 'edge_cells': []})
+    
+@app.route('/get_occupant', methods=['POST'])
+def get_occupant():
+    data = request.get_json()
+    row = data.get('row')
+    col = data.get('col')
+    occupant = game_board.board[row][col].occupant
+    if isinstance(occupant, Character):
+        return jsonify({
+            'type': 'character',
+            'name': occupant.name,
+            'health': occupant.health,
+            'strength': occupant.strength,
+            'speed': occupant.speed,
+            'skill': occupant.skill,
+            'defense': occupant.defense
+        })
+    else:
+        return jsonify({'type': 'node', 'show': game_board.board[row][col].show})
 
 if __name__ == '__main__':
     app.run()

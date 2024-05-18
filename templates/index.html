@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <div class="grid-container">
+        <div class="grid-container">
         <div class="dropdown" style="position: absolute; top: 0; right: 0;">
          <button class="dropbtn">Grid Line Intensity</button>
             <div class="dropdown-content">
@@ -35,16 +35,16 @@
 
     </div>
     
-    <div class="right-rectangle">
-        <div class="bottom-rectangle-text" id="highlighted-node-show"></div>
-    </div>
+    <div class="right-rectangle"></div>
+    
     <div class="bottom-rectangle">
-        <div class="dialogue_text"></div>
+        <button id="image-button">Next</button>
+        <!-- <div class="bottom-rectangle-text"></div> -->
     </div>
-    <button id="image-button"></button>
-    <div class="image-div">
+
+    <!-- <div class="image-div">
         <img class="talking-image" src="" alt="">
-    </div>
+    </div> -->
 
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>

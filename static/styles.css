@@ -66,19 +66,20 @@ body {
     justify-content: center;
     align-items: center;
     text-align: center;
+    z-index: 13;
 }
 
 .bottom-rectangle {
     position: absolute;
     bottom: 10vh;
-    /* Position at the bottom of the grid */
     left: 50%;
     transform: translateX(-50%);
     width: 50%;
-    height: 10vh;
+    height: 20vh;
     background-color: #f0f0f0;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-    z-index: -1;
+    z-index: 1;
+    /* decreased z-index */
 }
 
 .right-rectangle {
@@ -88,11 +89,14 @@ body {
     /* Position at the right of the grid */
     left: 60vw;
     transform: translateY(-50%);
-    width: 10vw;
-    height: 30vh;
+    width: 15vw;
+    /* Increased width by 50% */
+    height: 39vh;
+    /* Increased height by 30% */
     background-color: #f0f0f0;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
     z-index: -1;
+    background-color: rgba(72, 72, 228, 0.572);
 }
 
 .grid {
@@ -152,17 +156,11 @@ body {
 
 
 .image-div {
-    position: absolute;
-    bottom: 20vh;
-    /* moved down */
-    left: 10vw;
-    /* moved to the left */
+    /* moved to the right a middle amount */
     width: 10vw;
     height: 20vh;
-    /* made taller */
-    background-color: #d7d0d0;
     overflow: visible;
-    z-index: 1000;
+    z-index: 0;
 }
 
 .image-div img.talking-image {
@@ -178,20 +176,84 @@ body {
     position: absolute;
     bottom: 2vh;
     right: 2vw;
-    /* moved to the bottom right of the bottom div */
-    padding: 15px 30px;
-    /* made a little bigger */
-    font-size: 16px;
+    padding: 5px 10px;
+    font-size: 12px;
     border: none;
     border-radius: 5px;
-    background-color: #4CAF50;
+    background-color: #FF6347;
+    /* changed color to be a little more red */
     color: #fff;
     cursor: pointer;
     z-index: 2;
 }
 
 #image-button::after {
-    content: '>>';
+    /* content: '>>'; */
     /* added two arrows to the button */
     margin-left: 10px;
 }
+
+
+.highlighted-node-character-show {
+    position: absolute;
+    top: 0;
+    /* Position at the top of the right rectangle */
+    left: 0;
+    /* Position at the left of the right rectangle */
+    width: 100%;
+    /* Set the width to the full width of the right rectangle */
+    height: 100%;
+    /* Set the height to the full height of the right rectangle */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.character-attributes {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.invisible {
+    display: none;
+}
+
+.highlighted-node-character-show {
+    display: flex;
+    flex-direction: column;
+}
+
+.character-attributes {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.character-name {
+    font-size: larger;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.character-health {
+    padding-bottom: 10px;
+    /* Add some space between "Health" and its value */
+}
+
+.character-health::first-line {
+    text-decoration: underline;
+}
+
+.health-bar {
+    border: 1px solid black;
+    padding: 2px;
+}
+
+.health-bar {
+    position: relative;
+    top: -3px;
+    color: green;
+}
+
