@@ -275,7 +275,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const image = document.createElement('img');
         image.src = `/static/assets/${imageName}`;
         image.className = 'talking-image';
+        image.zIndex = 0;
         imageDiv.appendChild(image);
+        imageDiv.zIndex = 2;
 
         // Calculate left position based on image index
         let leftPosition;
@@ -307,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function () {
         speakerNameElement.style.textAlign = 'center'; // Center the speaker name
         speakerNameElement.style.top = '110px'; // Create a new stacking context
         speakerNameElement.style.position = 'absolute'; // Create a new stacking context
-        speakerNameElement.style.zIndex = 1000; // Set the z-index to a high value
+        speakerNameElement.style.zIndex = 2; // Set the z-index to a high value
         imageDiv.appendChild(speakerNameElement);
     }
 
