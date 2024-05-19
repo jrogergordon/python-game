@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function () {
         speakerNameElement.textContent = speakerName;
         speakerNameElement.style.fontWeight = 'bold'; // Make the speaker name bold
         speakerNameElement.style.textAlign = 'center'; // Center the speaker name
-        speakerNameElement.style.top = '100px'; // Create a new stacking context
+        speakerNameElement.style.top = '110px'; // Create a new stacking context
         speakerNameElement.style.position = 'absolute'; // Create a new stacking context
         speakerNameElement.style.zIndex = 1000; // Set the z-index to a high value
         imageDiv.appendChild(speakerNameElement);
