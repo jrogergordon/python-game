@@ -6,6 +6,7 @@ Test13
 Test14
 Test15
 Test16
+eraseSpeaker 0
 Test17
 8Test1
 Test19

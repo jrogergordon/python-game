@@ -66,7 +66,7 @@ body {
     justify-content: center;
     align-items: center;
     text-align: center;
-    z-index: 13;
+    z-index: 2;
 }
 
 .bottom-rectangle {
@@ -76,10 +76,12 @@ body {
     transform: translateX(-50%);
     width: 50%;
     height: 20vh;
-    background-color: #f0f0f0;
+    background-color: rgb(93,93,222);
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
     z-index: 1;
-    /* decreased z-index */
+    border-radius: 10px;
+    border: 2px solid black;
+    color: white;
 }
 
 .right-rectangle {
@@ -257,3 +259,9 @@ body {
     color: green;
 }
 
+.name-div {
+    border: 2px solid rgb(186, 182, 45);
+    padding: 5px;
+    background-color: white;
+    border-radius: 10px;
+}

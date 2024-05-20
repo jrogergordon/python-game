@@ -233,6 +233,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentSpeaker = '';
     let speakerImages = [];
     let dialogueLines = [];
+    let speakerNameLabels = [];
 
     fetch('/static/assets/dialogue_test.txt')
         .then(response => response.text())
@@ -244,6 +245,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function processDialogue() {
         const imageButton = document.getElementById('image-button');
 
+        let pastSpeakerIndex = null;
+
         imageButton.addEventListener('click', () => {
             if (dialogueTexts.length > 0) {
                 const line = dialogueTexts.shift();
@@ -253,6 +256,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     const speakerName = nameAndNumber[0];
                     const imageIndex = parseInt(nameAndNumber[1]);
                     displaySpeakerImage(speakerName, imageIndex);
+                    updateSpeakerNameLabel(pastSpeakerIndex, imageIndex);
+                    pastSpeakerIndex = imageIndex;
                     clearDialogueLines();
                 } else if (line.startsWith('eraseSpeaker')) {
                     const numbers = line.replace('eraseSpeaker ', '').trim().split(' ');
@@ -260,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         removeSpeakerImage(parseInt(number));
                     });
                 } else {
-                    displayDialogueLine(line);
+                    displayDialogueLine(line + '\n'); // add a new line after each line of text
                 }
             } else {
                 clearAll();
@@ -269,15 +274,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function displaySpeakerImage(speakerName, imageIndex) {
-        const imageName = `${speakerName}Talking.png`;
-        const imageDiv = document.createElement('div');
-        imageDiv.className = `image-div speaker-${imageIndex}`;
-        const image = document.createElement('img');
-        image.src = `/static/assets/${imageName}`;
-        image.className = 'talking-image';
-        image.zIndex = 0;
-        imageDiv.appendChild(image);
-        imageDiv.zIndex = 2;
+            const imageName = `${speakerName}Talking.png`;
+            const imageDiv = document.createElement('div');
+            // imageDiv.style.zIndex = 0
+            imageDiv.className = `image-div speaker-${imageIndex}`;
+            const image = document.createElement('img');
+            image.src = `/static/assets/${imageName}`;
+            image.className = 'talking-image';
 
         // Calculate left position based on image index
         let leftPosition;
@@ -297,20 +300,50 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         imageDiv.style.position = 'absolute';
-        imageDiv.style.top = '62%'; // Adjusted top position
+        imageDiv.style.top = '62%';
         imageDiv.style.left = leftPosition;
         imageDiv.style.transform = 'translate(-50%, -50%)';
+        imageDiv.appendChild(image);
 
         document.body.appendChild(imageDiv);
         speakerImages.push(imageDiv);
+
+        const nameLabelContainer = document.createElement('div');
+        nameLabelContainer.className = `name-div-${imageIndex} name-div`;
+        nameLabelContainer.style.position = 'absolute';
+        nameLabelContainer.style.top = '70%'; // Adjusted top position
+        nameLabelContainer.style.left = leftPosition;
+        nameLabelContainer.style.transform = 'translate(-50%, -50%)';
+        nameLabelContainer.style.zIndex = 3; // Set the z-index to a high value
+
         const speakerNameElement = document.createElement('div');
         speakerNameElement.textContent = speakerName;
         speakerNameElement.style.fontWeight = 'bold'; // Make the speaker name bold
         speakerNameElement.style.textAlign = 'center'; // Center the speaker name
-        speakerNameElement.style.top = '110px'; // Create a new stacking context
-        speakerNameElement.style.position = 'absolute'; // Create a new stacking context
-        speakerNameElement.style.zIndex = 2; // Set the z-index to a high value
-        imageDiv.appendChild(speakerNameElement);
+        speakerNameElement.style.top = '120px';
+
+        nameLabelContainer.appendChild(speakerNameElement);
+        document.body.appendChild(nameLabelContainer);
+        speakerNameLabels.push(nameLabelContainer);
+
+        updateSpeakerNameLabel(pastSpeaker=null, imageIndex);
+        pastSpeaker = imageIndex;
+    }
+
+    function updateSpeakerNameLabel(pastSpeakerIndex, currSpeakerIndex) {
+        if (pastSpeakerIndex !== null) {
+            const pastSpeakerNameLabel = document.querySelector(`.name-div-${pastSpeakerIndex}`);
+            if (pastSpeakerNameLabel) {
+                pastSpeakerNameLabel.style.visibility = 'hidden';
+            }
+        }
+        const currSpeakerNameLabel = document.querySelector(`.name-div-${currSpeakerIndex}`);
+        if (currSpeakerNameLabel) {
+            currSpeakerNameLabel.style.background = 'rgb(0, 0, 139)';
+            currSpeakerNameLabel.style.color = 'white';
+            currSpeakerNameLabel.style.borderRadius = '10px';
+            currSpeakerNameLabel.style.padding = '5px';
+        }
     }
 
     function displayDialogueLine(line) {
@@ -319,16 +352,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const bottomRectangle = document.querySelector('.bottom-rectangle');
             const newTextDiv = document.createElement('div');
             newTextDiv.className = 'bottom-rectangle-text';
-            newTextDiv.style.zIndex = 1; // Set the z-index of the text to 1
+            newTextDiv.style.zIndex = 1;
             bottomRectangle.appendChild(newTextDiv);
         }
-        const newLine = document.createElement('div');
-        newLine.textContent = line;
-        newLine.style.whiteSpace = 'pre-wrap'; // Preserve newline characters
-        document.querySelector('.bottom-rectangle-text').appendChild(newLine);
-        dialogueLines.push(newLine);
+        document.querySelector('.bottom-rectangle-text').innerHTML += line + '<br>'; // Use innerHTML to add a new line
+        dialogueLines.push(line);
         if (dialogueLines.length > 4) {
-            dialogueLines.shift().remove();
+            dialogueLines.shift();
+            document.querySelector('.bottom-rectangle-text').innerHTML = dialogueLines.join('<br>'); // Remove the oldest line and update the HTML
         }
     }
 
@@ -338,17 +369,24 @@ document.addEventListener('DOMContentLoaded', function () {
             imageDiv.remove();
             speakerImages.splice(imageIndex, 1);
         }
-    }
+        const nameDiv = document.querySelector(`.name-div-${imageIndex}`);
+        if (nameDiv) {
+            nameDiv.remove();
+            speakerNameLabels.splice(imageIndex, 1);
+        }
+    } 
 
     function clearDialogueLines() {
-        while (dialogueLines.length > 0) {
-            dialogueLines.shift().remove();
-        }
+        document.querySelector('.bottom-rectangle-text').innerHTML = '';
+        dialogueLines = [];
     }
 
     function clearAll() {
         while (speakerImages.length > 0) {
             speakerImages.shift().remove();
+        }
+        while (speakerNameLabels.length > 0) {
+            speakerNameLabels.shift().remove();
         }
         clearDialogueLines();
     }
