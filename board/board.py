@@ -1,20 +1,24 @@
 import sys
 sys.path.append('/home/jrogergordon/python_game/') 
 
-# Now you can import modules from the root directory
 from mapNode.map_node import board_node
 from character.character import Character
 
 
 class GameBoard:
-    def __init__(self, max=9, players=[], enemies=[], other=[], ally=[]):
+    def __init__(self, max=9, players=[], enemies=[], other=[], ally=[], currTargets={}, bve={}, bva={}, bvo={}):
         self.board = self.create_board()
         self.max = max
         self.players = players
         self.enemies = enemies
         self.others = other
         self.ally = ally
+        self.currTargets = currTargets
+        self.boardValueEnemies = bve
+        self.boardValueAlly = bva
+        self.boardValueOther = bvo
         self.highlighted_cell = [0, 0]
+
 
     def update_highlighted_cell(self, row, col):
         self.highlighted_cell = [row, col]
@@ -35,11 +39,11 @@ class GameBoard:
         if self.highlighted_cell[1] < 8:
             self.highlighted_cell[1] += 1
 
-    def create_board(self):
+    def create_board(self, x=9, y=9):
         board = []
-        for i in range(9):
+        for i in range(x):
             row = []
-            for j in range(9):
+            for j in range(y):
                 node = board_node(0, 0, None, j, i, 0)  # x is j, y is i
                 row.append(node)
             board.append(row)
