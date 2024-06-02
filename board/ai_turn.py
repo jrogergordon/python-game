@@ -53,7 +53,7 @@ def calculate_placement_value(self, unit, board_value_breakdown):
 
     for enemy_unit in enemy_units:
         if self.can_reach(enemy_unit, unit):
-            if enemy_unit.value > unit.value:
+            if enemy_unit.value > unit.value: 
                 placement_value -= 10 
                 board_value_breakdown[unit][f"placement_value_strong_enemy_{enemy_unit.name}"] = -10
             else:
