@@ -3,10 +3,11 @@ sys.path.append('/home/jrogergordon/python_game/')
 
 from mapNode.map_node import board_node
 from character.character import Character
+from board.ai_turn import AI
 
 
 class GameBoard:
-    def __init__(self, max=9, players=[], enemies=[], other=[], ally=[], currTargets={}, bve={}, bva={}, bvo={}):
+    def __init__(self, max=9, players=[], enemies=[], other=[], ally=[], currTargets={}, bvb={}):
         self.board = self.create_board()
         self.max = max
         self.players = players
@@ -14,11 +15,11 @@ class GameBoard:
         self.others = other
         self.ally = ally
         self.currTargets = currTargets
-        self.boardValueEnemies = bve
-        self.boardValueAlly = bva
-        self.boardValueOther = bvo
+        self.boardValueBreakdown = bvb
         self.highlighted_cell = [0, 0]
-
+        self.ai_green = AI("green")
+        self.ai_yellow = AI("yellow")
+        self.ai_red = AI("red")
 
     def update_highlighted_cell(self, row, col):
         self.highlighted_cell = [row, col]
@@ -149,7 +150,7 @@ class GameBoard:
             group = self.enemies
 
         scanned_nodes = {}
-        
+    
         for unit in group:
             unit_scanned = []
             for x in range(max(0, unit.x - unit.move - 1), min(9, unit.x + unit.move + 1)):
@@ -158,7 +159,7 @@ class GameBoard:
                         node = self.board[y][x]
                         if node.occupant and isinstance(node.occupant, Character) and ((team in ["yellow", "green"] and node.occupant.team == "red") 
                         or (team == "red" and node.occupant.team != team)):
-                            predicted_damage = self.predict_fight(unit, node.occupant)
+                            expected_fight_value = self.calculate_expected_fight_value(unit, node.occupant)
                             adjacent_nodes = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
                             reachable_nodes = []
                             for adj_x, adj_y in adjacent_nodes:
@@ -166,10 +167,10 @@ class GameBoard:
                                     if self.a_star(self.board[unit.y][unit.x], self.board[adj_y][adj_x]):                                      
                                         reachable_nodes.append((adj_x, adj_y))
                             if reachable_nodes:
-                                unit_scanned.append([node.occupant, predicted_damage, reachable_nodes])
+                                unit_scanned.append([node.occupant, expected_fight_value, reachable_nodes])
             scanned_nodes[unit] = unit_scanned
-
-        return scanned_nodes
+    
+        self.currTargets = scanned_nodes
 
     
     def predict_fight(self, character1, character2): 
@@ -275,5 +276,49 @@ class GameBoard:
         hit_likelihood, _ = self.calculate_hit_likelihood(character1, character2)
         expected_damage = predicted_damage * hit_likelihood
         return expected_damage
+    
+    def calculate_board_value(self, game_board):
+        if self.team == "green":
+            current_units = game_board.others
+        elif self.team == "yellow":
+            current_units = game_board.ally
+        else:
+            current_units = game_board.enemies
+        friendly_units = game_board.player + game_board.ally + game_board.others if self.team != "red" else game_board.enemies
+        enemy_units = game_board.enemies if self.team != "red" else game_board.player + game_board.ally + game_board.others
+        board_value = 0
+        board_value_breakdown = {}
+        for unit in current_units:
+            board_value_breakdown[unit] = {}
+            unit_value = unit.value * (unit.health / unit.totalHealth)
+            board_value_breakdown[unit]["unit_value"] = unit_value
+            board_value += unit_value
+            placement_value = self.calculate_placement_value(unit, friendly_units, enemy_units, game_board)
+            board_value_breakdown[unit]["placement_value"] = placement_value
+            board_value += placement_value
+
+            targets = game_board.currTargets[unit]
+            total_fight_value = 0
+            for target in targets:
+                total_fight_value += target[1]  # expected fight value is stored in the second element of the target list
+            average_fight_value = total_fight_value / len(targets) if targets else 0
+            board_value_breakdown[unit]["fight_value"] = average_fight_value
+            board_value += average_fight_value
+        for enemy_unit in enemy_units:
+            board_value_breakdown[enemy_unit] = {}
+            unit_value = -enemy_unit.value * (enemy_unit.health / enemy_unit.totalHealth)
+            board_value_breakdown[enemy_unit]["unit_value"] = unit_value
+            board_value += unit_value
+
+        game_board.boardValueBreakdown = board_value_breakdown
+
+        return board_value
+
+    def update_targets(self, unit, killed_unit=None):
+        for u in self.currTargets:
+            if u == unit:
+                self.currTargets[u] = []
+            else:
+                self.currTargets[u] = [target for target in self.currTargets[u] if target[0] != killed_unit]
 
 

@@ -19,7 +19,7 @@ class TestGameBoard(unittest.TestCase):
     # def test_board_contents(self):
     #     for row in self.game_board.board:
     #         for cell in row:
-    #             self.assertIsInstance(cell, map_node)
+    #             self.assertIsInstance(cell, map_node) 
 
     def test_place_piece(self):
         # Test 1: Placing a piece at a valid coordinate

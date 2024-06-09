@@ -83,3 +83,55 @@ class TestGameBoard(unittest.TestCase):
         # placement value for friendly_unit = 5 (since enemy_unit is within range)
         # total board value = 10 + 10 + 5 = 25
         self.assertEqual(self.game_board.calculate_board_value("green"), 25)
+
+    def test_best_move_no_targets(self):
+        game_board = GameBoard()
+        game_board.currTargets = {Character(name="Green Friend", team="green"): []}
+        best_move = game_board.best_move("green")
+        self.assertIsNone(best_move)
+
+    def test_best_move_one_target(self):
+        game_board = GameBoard()
+        character = Character(name="Green Friend", team="green")
+        enemy = Character(name="Red Enemy", team="red")
+        game_board.currTargets = {character: [[enemy, 40, [(1, 1)]]]}
+        best_move = game_board.best_move("green")
+        self.assertIsNotNone(best_move)
+        self.assertEqual(best_move[0].name, "Green Friend")
+        self.assertEqual(best_move[1], 1)
+        self.assertEqual(best_move[2], 1)
+
+    def test_best_move_multiple_targets(self):
+        game_board = GameBoard()
+        character = Character(name="Green Friend", team="green")
+        enemy1 = Character(name="Red Enemy 1", team="red")
+        enemy2 = Character(name="Red Enemy 2", team="red")
+        game_board.currTargets = {character: [[enemy1, 40, [(1, 1)]], [enemy2, 40, [(3, 3)]]]}
+        best_move = game_board.best_move("green")
+        self.assertIsNotNone(best_move)
+        self.assertEqual(best_move[0].name, "Green Friend")
+        self.assertIn(best_move[1], [1, 3])
+        self.assertIn(best_move[2], [1, 3])
+
+    def test_best_move_target_out_of_range(self):
+        game_board = GameBoard()
+        character = Character(name="Green Friend", team="green")
+        enemy = Character(name="Red Enemy", team="red")
+        game_board.currTargets = {character: [[enemy, 40, []]]}
+        best_move = game_board.best_move("green")
+        self.assertIsNone(best_move)
+
+    def test_best_move_target_with_higher_value(self):
+        game_board = GameBoard()
+        character = Character(name="Green Friend", team="green")
+        enemy1 = Character(name="Red Enemy 1", team="red", value=10)
+        enemy2 = Character(name="Red Enemy 2", team="red", value=20)
+        game_board.currTargets = {character: [[enemy1, 40, [(1, 1)]], [enemy2, 40, [(3, 3)]]]}
+        best_move = game_board.best_move("green")
+        self.assertIsNotNone(best_move)
+        self.assertEqual(best_move[0].name, "Green Friend")
+        self.assertEqual(best_move[1], 3)
+        self.assertEqual(best_move[2], 3)
+
+if __name__ == '__main__':
+    unittest.main()

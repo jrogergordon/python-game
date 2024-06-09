@@ -1,7 +1,7 @@
 import random
 
 class Character:
-    def __init__(self, name="Joe", totalHealth=100, health=100, strength=10, speed=10, defense=10, skill=0, move=5, inventory=[], equipped="", show="\u265E", team="blue", x=0, y=0, value=0):
+    def __init__(self, name="Joe", totalHealth=100, health=100, strength=10, speed=10, defense=10, skill=0, move=5, inventory=[], equipped="", show="\u265E", team="blue", x=0, y=0, value=0, used=0):
         self.name = name
         self.totalHealth = totalHealth
         self.health = health
@@ -17,6 +17,7 @@ class Character:
         self.x = x
         self.y = y
         self.value = value
+        self.used = used
 
     def change_health(self, amount):
         self.health += amount
