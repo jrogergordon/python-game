@@ -3,7 +3,7 @@ sys.path.append('/home/jrogergordon/python_game/')
 
 import unittest
 from board import GameBoard
-from character.character import Character  
+from character.character import Character   
 from mapNode.map_node import board_node
 from weapon.weapon import Weapon
 
