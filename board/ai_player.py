@@ -1,64 +1,66 @@
 class AI:
     def __init__(self, team):
         self.team = team
+        self.units = []
+        self.boardValueBreakdown = {}
+        self.currTargets = {}
+
+    def populate_units(self, game_board):
+        if self.team == "green":
+            self.units = game_board.others
+        elif self.team == "yellow":
+            self.units = game_board.ally
+        else:
+            self.units = game_board.enemies
 
     def calculate_placement_value(self, unit, friendly_units, enemy_units, game_board):
         placement_value = 0
         for enemy_unit in enemy_units:
-            if game_board.can_reach(enemy_unit, unit):
+            if game_board.a_star(game_board.board[unit.y][unit.x], game_board.board[enemy_unit.y][enemy_unit.x]):
                 if enemy_unit.value > unit.value:   
                     placement_value -= 10
                 else:
                     placement_value += 5
 
         for friendly_unit in friendly_units:
-            if friendly_unit != unit and game_board.can_reach(friendly_unit, unit):
+            if friendly_unit != unit and game_board.a_star(game_board.board[unit.y][unit.x], game_board.board[friendly_unit.y][friendly_unit.x]):
                 if friendly_unit.value > unit.value:
                     placement_value += 5
                 else:
                     placement_value += 2
         return placement_value
 
-    def can_reach(self, unit1, unit2):
-        return abs(unit1.x - unit2.x) + abs(unit1.y - unit2.y) <= unit1.move + 1
-
     def best_move(self, game_board):
         best_move = None
         best_move_value = float('-inf')
-        if self.team == "green":
-            units = game_board.others
-        elif self.team == "yellow":
-            units = game_board.ally
-        else:
-            units = game_board.enemies
-        for unit in units:
-            targets = game_board.currTargets[unit]
+        for unit in self.units:
+            targets = self.currTargets[unit]
             for target in targets:
                 enemy_unit = target[0]
                 fight_value = target[1]
                 reachable_nodes = target[2]
-                for node in reachable_nodes:
-                    # Imitate the move happening
-                    old_x, old_y = unit.x, unit.y
-                    unit.x, unit.y = node
-                    # Calculate the expected fight value
-                    expected_fight_value = game_board.calculate_expected_fight_value(unit, enemy_unit)
-                    # Imitate the fight happening
-                    old_health1, old_health2 = unit.health, enemy_unit.health
-                    game_board.fight(unit, enemy_unit)
-                    health_change1 = unit.health - old_health1
-                    health_change2 = enemy_unit.health - old_health2
-                    # Calculate the value of the health change
-                    health_change_value = (health_change1 / unit.totalHealth) * unit.value + (health_change2 / enemy_unit.totalHealth) * enemy_unit.value
-                    # Calculate the placement value
-                    placement_value = self.calculate_placement_value(unit, units, game_board.enemies if self.team != "red" else game_board.player + game_board.ally + game_board.others, game_board)
-                    # Undo the move and the fight
-                    unit.x, unit.y = old_x, old_y
-                    unit.health, enemy_unit.health = old_health1, old_health2
-                    # Check if this move is the best so far
-                    if placement_value + expected_fight_value + health_change_value > best_move_value:
-                        best_move_value = placement_value + expected_fight_value + health_change_value
-                        best_move = (unit, node[0], node[1])
+                node = reachable_nodes[0]
+                # Imitate the move happening
+                old_x, old_y = unit.x, unit.y
+                unit.x, unit.y = node
+                # Calculate the expected fight value
+                expected_fight_value = game_board.calculate_expected_fight_value(unit, enemy_unit)
+                # Imitate the fight happening
+                old_health1, old_health2 = unit.health, enemy_unit.health
+                game_board.fight(unit, enemy_unit)
+                health_change1 = unit.health - old_health1
+                health_change2 = enemy_unit.health - old_health2
+                # Calculate the value of the health change
+                health_change_value = (health_change1 / unit.totalHealth) * unit.value + (health_change2 / enemy_unit.totalHealth) * enemy_unit.value
+                # Calculate the placement value
+                placement_value = self.calculate_placement_value(unit, self.units, game_board.enemies if self.team != "red" else game_board.player + game_board.ally + game_board.others, game_board)
+                # Undo the move and the fight
+                unit.x, unit.y = old_x, old_y
+                unit.health, enemy_unit.health = old_health1, old_health2
+                # Check if this move is the best so far
+                if placement_value + expected_fight_value + health_change_value > best_move_value:
+                    best_move_value = placement_value + expected_fight_value + health_change_value
+                    best_move = (unit, node[0], node[1])
         return best_move
     
     def find_targets(self, game_board):
@@ -89,7 +91,7 @@ class AI:
                                 unit_scanned.append([node.occupant, expected_fight_value, reachable_nodes])
             scanned_nodes[unit] = unit_scanned
     
-        game_board.currTargets = scanned_nodes
+        self.currTargets = scanned_nodes
 
     def update_board_value_breakdown(self, unit, other_unit, board_value):
         # Update the board value breakdown based on the new health of the units
@@ -100,7 +102,7 @@ class AI:
 
         # Update the placement value for the unit
         old_placement_value = self.boardValueBreakdown[unit]["placement_value"]
-        self.boardValueBreakdown[unit]["placement_value"] = self.calculate_placement_value(unit, self.units, self.game_board.enemies if self.team != "red" else self.game_board.player + self.game_board.ally + self.game_board.others, self.game_board)
+        self.boardValueBreakdown[unit]["placement_value"] = self.calculate_placement_value(unit, self.units, game_board.enemies if self.team != "red" else game_board.player + game_board.ally + game_board.others, game_board)
         new_placement_value = self.boardValueBreakdown[unit]["placement_value"]
         board_value += new_placement_value - old_placement_value
 
@@ -112,4 +114,3 @@ class AI:
             board_value += other_unit_value - old_other_unit_value
 
         return board_value
-

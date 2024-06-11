@@ -3,7 +3,7 @@ sys.path.append('/home/jrogergordon/python_game/')
 
 from mapNode.map_node import board_node
 from character.character import Character
-from board.ai_turn import AI
+from board.ai_player import AI
 
 
 class GameBoard:
