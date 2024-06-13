@@ -1,3 +1,8 @@
+import sys
+sys.path.append('/home/jrogergordon/python_game/') 
+
+from character.character import Character
+
 class AI:
     def __init__(self, team):
         self.team = team
@@ -38,8 +43,8 @@ class AI:
             for target in targets:
                 enemy_unit = target[0]
                 fight_value = target[1]
-                reachable_nodes = target[2]
-                node = reachable_nodes[0]
+                # Use the enemy's position instead of the first reachable node
+                node = (enemy_unit.x, enemy_unit.y)
                 # Imitate the move happening
                 old_x, old_y = unit.x, unit.y
                 unit.x, unit.y = node
@@ -92,6 +97,44 @@ class AI:
             scanned_nodes[unit] = unit_scanned
     
         self.currTargets = scanned_nodes
+
+    def calculate_board_value(self, game_board):
+        if self.team == "green":
+            current_units = game_board.others
+        elif self.team == "yellow":
+            current_units = game_board.ally
+        else:
+            current_units = game_board.enemies
+        friendly_units = game_board.player + game_board.ally + game_board.others if self.team != "red" else game_board.enemies
+        enemy_units = game_board.enemies if self.team != "red" else game_board.player + game_board.ally + game_board.others
+        board_value = 0
+        board_value_breakdown = {}
+        for unit in current_units:
+            board_value_breakdown[unit] = {}
+            unit_value = unit.value * (unit.health / unit.totalHealth)
+            board_value_breakdown[unit]["unit_value"] = unit_value
+            board_value += unit_value
+            placement_value = self.calculate_placement_value(unit, friendly_units, enemy_units, game_board)
+            board_value_breakdown[unit]["placement_value"] = placement_value
+            board_value += placement_value
+
+            targets = game_board.currTargets[unit]
+            total_fight_value = 0
+            for target in targets:
+                total_fight_value += target[1]  # expected fight value is stored in the second element of the target list
+            average_fight_value = total_fight_value / len(targets) if targets else 0
+            board_value_breakdown[unit]["fight_value"] = average_fight_value
+            board_value += average_fight_value
+        for enemy_unit in enemy_units:
+            board_value_breakdown[enemy_unit] = {}
+            unit_value = -enemy_unit.value * (enemy_unit.health / enemy_unit.totalHealth)
+            board_value_breakdown[enemy_unit]["unit_value"] = unit_value
+            board_value += unit_value
+
+        game_board.boardValueBreakdown = board_value_breakdown
+
+        return board_value
+
 
     def update_board_value_breakdown(self, unit, other_unit, board_value):
         # Update the board value breakdown based on the new health of the units

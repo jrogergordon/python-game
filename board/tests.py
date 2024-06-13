@@ -201,7 +201,8 @@ class TestGameBoard(unittest.TestCase):
         self.game_board.board[1][1].occupant = self.game_board.enemies[0]
         self.game_board.others = [Character(name="Green Friend", x=2, y=2, team="green", move=2, health=100, strength=50, defense=10)]
         self.game_board.board[2][2].occupant = self.game_board.others[0]
-        targets = self.game_board.find_targets("green")
+        self.game_board.find_targets("green")
+        targets = self.game_board.currTargets
         for key, values in targets.items():
             for value in values:
                 self.assertEqual(key.name, "Green Friend")
@@ -214,7 +215,8 @@ class TestGameBoard(unittest.TestCase):
         self.game_board.board[1][1].occupant = self.game_board.enemies[0]
         self.game_board.others = [Character(name="Green Friend", x=4, y=4, team="green", move=2, health=100, strength=50, defense=10)]
         self.game_board.board[4][4].occupant = self.game_board.others[0]
-        targets = self.game_board.find_targets("green")
+        self.game_board.find_targets("green")
+        targets = self.game_board.currTargets
         for key, values in targets.items():
             for value in values:
                 self.assertEqual(key.name, "Green Friend")
@@ -227,7 +229,8 @@ class TestGameBoard(unittest.TestCase):
         self.game_board.board[1][4].occupant = self.game_board.enemies[0]
         self.game_board.others = [Character(name="Green Friend", x=4, y=4, team="green", move=2, health=100, strength=50, defense=10)]
         self.game_board.board[4][4].occupant = self.game_board.others[0]
-        targets = self.game_board.find_targets("green")
+        self.game_board.find_targets("green")
+        targets = self.game_board.currTargets
         for key, values in targets.items():
             for value in values:
                 self.assertEqual(key.name, "Green Friend")
@@ -240,7 +243,8 @@ class TestGameBoard(unittest.TestCase):
         self.game_board.board[1][1].occupant = self.game_board.enemies[0]
         self.game_board.others = [Character(name="Green Friend", x=3, y=1, team="green", move=2, health=100, strength=50, defense=10)]
         self.game_board.board[1][3].occupant = self.game_board.others[0]
-        targets = self.game_board.find_targets("green")
+        self.game_board.find_targets("green")
+        targets = self.game_board.currTargets
         for key, values in targets.items():
             for value in values:
                 self.assertEqual(key.name, "Green Friend")
@@ -298,6 +302,62 @@ class TestGameBoard(unittest.TestCase):
         character2.equipped = weapon2
         likelihood1, likelihood2 = self.game_board.calculate_hit_likelihood(character1, character2)
         self.assertGreater(likelihood1, likelihood2)
+
+    def test_best_move_multiple_targets(self):
+        self.game_board.enemies = [Character(name="Red Enemy 1", x=1, y=2, team="red", move=1, health=100, strength=50, defense=10, value=10),
+                                   Character(name="Red Enemy 2", x=3, y=2, team="red", move=1, health=80, strength=40, defense=10, value=8)]
+        self.game_board.board[2][1].occupant = self.game_board.enemies[0]
+        self.game_board.board[2][3].occupant = self.game_board.enemies[1]
+        self.game_board.others = [Character(name="Green Friend", x=2, y=2, team="green", move=2, health=100, strength=50, defense=10, value=10)]
+        self.game_board.board[2][2].occupant = self.game_board.others[0]
+        self.ai.populate_units(self.game_board)
+        self.ai.find_targets(self.game_board)
+        best_move = self.ai.best_move(self.game_board)
+        self.assertEqual(best_move[0], self.game_board.others[0])
+        self.assertEqual(best_move[1], 1)
+        self.assertEqual(best_move[2], 2)
+
+    def test_best_move_many_characters(self):
+        self.game_board.enemies = [Character(name="Red Enemy 1", x=1, y=2, team="red", move=1, health=100, strength=50, defense=10, value=10),
+                                   Character(name="Red Enemy 2", x=3, y=2, team="red", move=1, health=80, strength=40, defense=10, value=8),
+                                   Character(name="Red Enemy 3", x=5, y=2, team="red", move=1, health=60, strength=30, defense=10, value=6)]
+        self.game_board.board[2][1].occupant = self.game_board.enemies[0]
+        self.game_board.board[2][3].occupant = self.game_board.enemies[1]
+        self.game_board.board[2][5].occupant = self.game_board.enemies[2]
+        self.game_board.others = [Character(name="Green Friend 1", x=2, y=2, team="green", move=2, health=100, strength=50, defense=10, value=10),
+                                  Character(name="Green Friend 2", x=4, y=2, team="green", move=2, health=80, strength=40, defense=10, value=8),
+                                  Character(name="Green Friend 3", x=6, y=2, team="green", move=2, health=60, strength=30, defense=10, value=6)]
+        self.game_board.board[2][2].occupant = self.game_board.others[0]
+        self.game_board.board[2][4].occupant = self.game_board.others[1]
+        self.game_board.board[2][6].occupant = self.game_board.others[2]
+        self.ai.populate_units(self.game_board)
+        self.ai.find_targets(self.game_board)
+        best_move = self.ai.best_move(self.game_board)
+        self.assertEqual(best_move[0], self.game_board.others[0])
+        self.assertEqual(best_move[1], 1)
+        self.assertEqual(best_move[2], 2)
+
+    def test_best_move_many_characters_out_of_range(self):
+        self.game_board.enemies = [Character(name="Red Enemy 1", x=1, y=2, team="red", move=1, health=100, strength=50, defense=10, value=10),
+                                   Character(name="Red Enemy 2", x=3, y=2, team="red", move=1, health=80, strength=40, defense=10, value=8),
+                                   Character(name="Red Enemy 3", x=5, y=2, team="red", move=1, health=60, strength=30, defense=10, value=6),
+                                   Character(name="Red Enemy 4", x=10, y=10, team="red", move=1, health=120, strength=60, defense=10, value=12)]
+        self.game_board.board[2][1].occupant = self.game_board.enemies[0]
+        self.game_board.board[2][3].occupant = self.game_board.enemies[1]
+        self.game_board.board[2][5].occupant = self.game_board.enemies[2]
+        self.game_board.board[10][10].occupant = self.game_board.enemies[3]
+        self.game_board.others = [Character(name="Green Friend 1", x=2, y=2, team="green", move=2, health=100, strength=50, defense=10, value=10),
+                                  Character(name="Green Friend 2", x=4, y=2, team="green", move=2, health=80, strength=40, defense=10, value=8),
+                                  Character(name="Green Friend 3", x=6, y=2, team="green", move=2, health=60, strength=30, defense=10, value=6)]
+        self.game_board.board[2][2].occupant = self.game_board.others[0]
+        self.game_board.board[2][4].occupant = self.game_board.others[1]
+        self.game_board.board[2][6].occupant = self.game_board.others[2]
+        self.ai.populate_units(self.game_board)
+        self.ai.find_targets(self.game_board)
+        best_move = self.ai.best_move(self.game_board)
+        self.assertEqual(best_move[0], self.game_board.others[0])
+        self.assertEqual(best_move[1], 1)
+        self.assertEqual(best_move[2], 2)
 
 
 if __name__ == '__main__':

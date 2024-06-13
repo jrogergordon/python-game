@@ -21,6 +21,12 @@ class GameBoard:
         self.ai_yellow = AI("yellow")
         self.ai_red = AI("red")
 
+    def move_character(self, character, new_x, new_y):
+        old_x, old_y = character.x, character.y
+        character.x, character.y = new_x, new_y
+        self.board[old_y][old_x].occupant = None
+        self.board[new_y][new_x].occupant = character
+
     def update_highlighted_cell(self, row, col):
         self.highlighted_cell = [row, col]
 
@@ -277,43 +283,6 @@ class GameBoard:
         expected_damage = predicted_damage * hit_likelihood
         return expected_damage
     
-    def calculate_board_value(self, game_board):
-        if self.team == "green":
-            current_units = game_board.others
-        elif self.team == "yellow":
-            current_units = game_board.ally
-        else:
-            current_units = game_board.enemies
-        friendly_units = game_board.player + game_board.ally + game_board.others if self.team != "red" else game_board.enemies
-        enemy_units = game_board.enemies if self.team != "red" else game_board.player + game_board.ally + game_board.others
-        board_value = 0
-        board_value_breakdown = {}
-        for unit in current_units:
-            board_value_breakdown[unit] = {}
-            unit_value = unit.value * (unit.health / unit.totalHealth)
-            board_value_breakdown[unit]["unit_value"] = unit_value
-            board_value += unit_value
-            placement_value = self.calculate_placement_value(unit, friendly_units, enemy_units, game_board)
-            board_value_breakdown[unit]["placement_value"] = placement_value
-            board_value += placement_value
-
-            targets = game_board.currTargets[unit]
-            total_fight_value = 0
-            for target in targets:
-                total_fight_value += target[1]  # expected fight value is stored in the second element of the target list
-            average_fight_value = total_fight_value / len(targets) if targets else 0
-            board_value_breakdown[unit]["fight_value"] = average_fight_value
-            board_value += average_fight_value
-        for enemy_unit in enemy_units:
-            board_value_breakdown[enemy_unit] = {}
-            unit_value = -enemy_unit.value * (enemy_unit.health / enemy_unit.totalHealth)
-            board_value_breakdown[enemy_unit]["unit_value"] = unit_value
-            board_value += unit_value
-
-        game_board.boardValueBreakdown = board_value_breakdown
-
-        return board_value
-
     def update_targets(self, unit, killed_unit=None):
         for u in self.currTargets:
             if u == unit:

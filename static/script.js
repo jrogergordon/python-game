@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     let spacePressed = false;
-
+    
     document.addEventListener('keydown', function (event) {
         if (event.key === ' ') {
             const highlightedCell = document.querySelector('.highlighted');
@@ -71,6 +71,40 @@ document.addEventListener('DOMContentLoaded', function () {
             const row = Math.floor(index / 9);
             const col = index % 9;
             updateHighlightedCell([row, col]);
+        });
+    });
+    cells.forEach((cell, index) => {
+        cell.addEventListener('click', () => {
+            const row = Math.floor(index / 9);
+            const col = index % 9;
+            const highlightedCell = document.querySelector('.highlighted');
+            if (highlightedCell && highlightedCell.dataset.row == row && highlightedCell.dataset.col == col) {
+                // Move the character to the clicked cell
+                fetch('/move_character', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        character: game_board.board[row][col].occupant,
+                        new_x: row,
+                        new_y: col
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Remove the highlighting
+                        spacePressed = false;
+                        const blueCells = document.querySelectorAll('.blue');
+                        blueCells.forEach(cell => {
+                            cell.classList.remove('blue');
+                        });
+                        const orangeCells = document.querySelectorAll('.orange');
+                        orangeCells.forEach(cell => {
+                            cell.classList.remove('orange');
+                        });
+                    });
+            }
         });
     });
 
