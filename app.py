@@ -82,15 +82,16 @@ def get_occupant():
         })
     else:
         return jsonify({'type': 'node', 'show': game_board.board[row][col].show})
-    
+
 @app.route('/move_character', methods=['POST'])
 def move_character():
     data = request.get_json()
-    character = data['character']
-    new_x = data['new_x']
-    new_y = data['new_y']
+    character = data.get('character')
+    new_x = data.get('new_x')
+    new_y = data.get('new_y')
     game_board.move_character(character, new_x, new_y)
-    return jsonify({'success': True})
+    return jsonify({'message': 'Character moved successfully'})
+    
     
 
 if __name__ == '__main__':

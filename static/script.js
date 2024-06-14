@@ -44,6 +44,41 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        if (event.key === ' ' && spacePressed) {
+            const highlightedCell = document.querySelector('.highlighted');
+            const row = highlightedCell.dataset.row;
+            const col = highlightedCell.dataset.col;
+            const newHighlightedCell = document.querySelector('.blue:hover');
+            if (newHighlightedCell) {
+                const newRow = newHighlightedCell.dataset.row;
+                const newCol = newHighlightedCell.dataset.col;
+                fetch('/move_character', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        character: game_board.board[row][col].occupant,
+                        new_x: newRow,
+                        new_y: newCol
+                    })
+                })
+                    .then(response => response.json())
+                    .then(() => {
+                        spacePressed = false;
+                        const blueCells = document.querySelectorAll('.blue');
+                        blueCells.forEach(cell => {
+                            cell.classList.remove('blue');
+                        });
+                        const orangeCells = document.querySelectorAll('.orange');
+                        orangeCells.forEach(cell => {
+                            cell.classList.remove('orange');
+                        });
+                        updateHighlightedCell([newRow, newCol]);
+                    });
+            }
+        }
+
         if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             event.preventDefault();
             let direction;
@@ -63,51 +98,34 @@ document.addEventListener('DOMContentLoaded', function () {
     const cells = document.querySelectorAll('.cell');
     cells.forEach((cell, index) => {
         cell.addEventListener('click', () => {
-            spacePressed = false;
-            const blueCells = document.querySelectorAll('.blue');
-            blueCells.forEach(cell => {
-                cell.classList.remove('blue');
-            });
             const row = Math.floor(index / 9);
             const col = index % 9;
             updateHighlightedCell([row, col]);
         });
     });
-    cells.forEach((cell, index) => {
-        cell.addEventListener('click', () => {
-            const row = Math.floor(index / 9);
-            const col = index % 9;
-            const highlightedCell = document.querySelector('.highlighted');
-            if (highlightedCell && highlightedCell.dataset.row == row && highlightedCell.dataset.col == col) {
-                // Move the character to the clicked cell
-                fetch('/move_character', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        character: game_board.board[row][col].occupant,
-                        new_x: row,
-                        new_y: col
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Remove the highlighting
-                        spacePressed = false;
-                        const blueCells = document.querySelectorAll('.blue');
-                        blueCells.forEach(cell => {
-                            cell.classList.remove('blue');
-                        });
-                        const orangeCells = document.querySelectorAll('.orange');
-                        orangeCells.forEach(cell => {
-                            cell.classList.remove('orange');
-                        });
-                    });
-            }
-        });
-    });
 
+    const moveButton = document.getElementById('move-button');
+
+    moveButton.addEventListener('click', () => {
+        const highlightedCell = document.querySelector('.highlighted');
+        const row = highlightedCell.dataset.row;
+        const col = highlightedCell.dataset.col;
+        fetch('/move_character', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                character: game_board.board[row][col].occupant,
+                new_x: row,
+                new_y: col
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            });
+    });
 
     // Helper function to create a single attribute div
     function createSingleAttributeDiv(attributeName, attributeValue) {
@@ -198,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function () {
             highlightedNodeShow.remove();
         }
     }
-
+    
     function updateHighlightedCell(directionOrCell) {
         fetch('/update_highlighted_cell', {
             method: 'POST',
@@ -239,6 +257,45 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
             });
+        const highlightedCell = document.querySelector('.highlighted');
+        highlightedCell.addEventListener('click', () => {
+            spacePressed = !spacePressed;
+            const blueCells = document.querySelectorAll('.blue');
+            blueCells.forEach(cell => {
+                cell.classList.remove('blue');
+            });
+            const orangeCells = document.querySelectorAll('.orange');
+            orangeCells.forEach(cell => {
+                cell.classList.remove('orange');
+            });
+            if (spacePressed) {
+                const row = highlightedCell.dataset.row;
+                const col = highlightedCell.dataset.col;
+                fetch('/get_reachable_cells', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        row: parseInt(row),
+                        col: parseInt(col)
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        data.reachable_cells.forEach(cell => {
+                            const cellElement = document.querySelector(`[data-row="${cell[0]}"][data-col="${cell[1]}"]`);
+                            cellElement.classList.add('blue');
+                        });
+                        data.edge_cells.forEach(cell => {
+                            const cellElement = document.querySelector(`[data-row="${cell[0]}"][data-col="${cell[1]}"]`);
+                            if (cellElement) {
+                                cellElement.classList.add('orange');
+                            }
+                        });
+                    });
+            }
+        });
     }
 
     updateHighlightedCell([0, 0]);
@@ -425,5 +482,35 @@ document.addEventListener('DOMContentLoaded', function () {
         clearDialogueLines();
     }
 
-    
+    document.addEventListener('keydown', (event) => {
+        if (event.key === ' ' && spacePressed) {
+            const highlightedCell = document.querySelector('.highlighted');
+            const row = highlightedCell.dataset.row;
+            const col = highlightedCell.dataset.col;
+            fetch('/move_character', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    character: game_board.board[row][col].occupant,
+                    new_x: row,
+                    new_y: col
+                })
+            })
+                .then(response => response.json())
+                .then(() => {
+                    spacePressed = false;
+                    const blueCells = document.querySelectorAll('.blue');
+                    blueCells.forEach(cell => {
+                        cell.classList.remove('blue');
+                    });
+                    const orangeCells = document.querySelectorAll('.orange');
+                    orangeCells.forEach(cell => {
+                        cell.classList.remove('orange');
+                    });
+                });
+        }
+    });
+
 });
