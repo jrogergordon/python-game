@@ -10,7 +10,7 @@ function processDialogue(dialogue) {
 
     imageButton.addEventListener('click', () => {
         if (dialogueTexts.length > 0) {
-            const line = dialogueTexts.shift();
+            const line = dialogueTexts.shift(); 
             if (line.startsWith('currentSpeaker:')) {
                 const parts = line.split(':');
                 const nameAndNumber = parts[1].trim().split(' ');
