@@ -6,7 +6,7 @@ let dialogueLines = [];
 
 function processDialogue(dialogue) {
     dialogueTexts = dialogue;
-    const imageButton = document.getElementById('image-button');
+    const imageButton = document.getElementById('image-button'); 
 
     imageButton.addEventListener('click', () => {
         if (dialogueTexts.length > 0) {
