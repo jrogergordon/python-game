@@ -9,30 +9,14 @@
 </head>
 
 <body>
-        <div class="grid-container">
-        <div class="dropdown" style="position: absolute; top: 0; right: 0;">
-         <button class="dropbtn">Grid Line Intensity</button>
-            <div class="dropdown-content">
-                <a href="#" data-border-intensity="0">No Border</a>
-                <a href="#" data-border-intensity="1">Some Border</a>
-             <a href="#" data-border-intensity="2">Max Border</a>
-            </div>
-        </div>
-        <div class="grid">
-            {% for row in game_board %}
-            {% set outer_index = loop.index0 %}
-            {% for node in row %}
-            <div class="cell" data-row="{{ outer_index }}" data-col="{{ loop.index0 }}">
-                {% if node.occupant != 0 %}
-                {{ node.occupant.show }}
-                {% else %}
-                {{ node.show }}
-                {% endif %}
-            </div>
-            {% endfor %}
+    <div class="grid">
+        {% for i in range(board_size) %}
+        <div>
+            {% for j in range(board_size) %}
+            <div class="cell" id="{{ j }}_{{ i }}" data-row="{{ i }}" data-col="{{ j }}"></div>
             {% endfor %}
         </div>
-
+        {% endfor %}
     </div>
     
     <div class="right-rectangle"></div>
@@ -42,11 +26,11 @@
         <!-- <div class="bottom-rectangle-text"></div> -->
     </div>
 
-    <button id="move-button">Move</button>
     
 
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script type="module" src="static/script.js"></script>
+
 </body>
 
 </html>

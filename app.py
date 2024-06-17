@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('index.html', game_board=game_board.board)
+    return render_template('index.html', board_size=len(game_board.board), game_board=game_board)
 
 @app.route('/update_highlighted_cell', methods=['POST'])
 def update_highlighted_cell():
@@ -82,16 +82,23 @@ def get_occupant():
         })
     else:
         return jsonify({'type': 'node', 'show': game_board.board[row][col].show})
-
-@app.route('/move_character', methods=['POST'])
-def move_character():
-    data = request.get_json()
-    character = data.get('character')
-    new_x = data.get('new_x')
-    new_y = data.get('new_y')
-    game_board.move_character(character, new_x, new_y)
-    return jsonify({'message': 'Character moved successfully'})
     
+@app.route('/get_board')
+def get_board():
+    board_data = []
+    for row in game_board.board:
+        row_data = []
+        for node in row:
+            node_data = {
+                'occupant': node.occupant.show if node.occupant else None,
+                'show': node.show
+            }
+            row_data.append(node_data)
+        board_data.append(row_data)
+    return jsonify({'board': board_data})
+    
+    
+
     
 
 if __name__ == '__main__':
