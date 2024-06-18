@@ -1,5 +1,6 @@
 let dialogueTexts = [];
 let pastSpeakerIndex = null;
+let pastSpeaker = null;
 let speakerImages = [];
 let speakerNameLabels = [];
 let dialogueLines = [];
@@ -42,6 +43,7 @@ function displaySpeakerImage(speakerName, imageIndex) {
         const image = document.createElement('img');
         image.src = `/static/assets/${imageName}`;
         image.className = 'talking-image';
+        image.style.filter = 'brightness(1)'; // Reset brightness to 100%
 
     // Calculate left position based on image index
     let leftPosition;
@@ -95,8 +97,10 @@ function updateSpeakerNameLabel(pastSpeakerIndex, currSpeakerIndex) {
     if (pastSpeakerIndex !== null) {
         const pastSpeakerNameLabel = document.querySelector(`.name-div-${pastSpeakerIndex}`);
         if (pastSpeakerNameLabel) {
-            pastSpeakerNameLabel.style.visibility = 'hidden';
+            pastSpeakerNameLabel.style.background = 'rgba(0, 0, 139, 0.5)';
+            pastSpeakerNameLabel.style.color = 'gray';
         }
+        darkenOldSpeakerImage(pastSpeakerIndex);
     }
     const currSpeakerNameLabel = document.querySelector(`.name-div-${currSpeakerIndex}`);
     if (currSpeakerNameLabel) {
@@ -104,6 +108,13 @@ function updateSpeakerNameLabel(pastSpeakerIndex, currSpeakerIndex) {
         currSpeakerNameLabel.style.color = 'white';
         currSpeakerNameLabel.style.borderRadius = '10px';
         currSpeakerNameLabel.style.padding = '5px';
+    }
+}
+
+function darkenOldSpeakerImage(pastSpeakerIndex) {
+    const oldSpeakerImage = document.querySelector(`.speaker-${pastSpeakerIndex} img`);
+    if (oldSpeakerImage) {
+        oldSpeakerImage.style.filter = 'brightness(50%)';
     }
 }
 

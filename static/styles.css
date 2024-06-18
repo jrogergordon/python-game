@@ -16,21 +16,8 @@
 }
 
 .cell {
-    width: calc(11vw / {
-                {
-                game_board[0]|length
-            }
-        }
-
-        / 2);
-    /* sets the width of each cell to half its original size */
-    height: calc(11vw / {
-                {
-                game_board|length
-            }
-        }
-
-        / 2);
+    width:23px;
+    height: 23px;;
     /* sets the height of each cell to half its original size */
     text-align: center;
     /* centers the content of each cell */
@@ -265,4 +252,5 @@ body {
     background-color: white;
     border-radius: 10px;
 }
+
 
