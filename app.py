@@ -45,24 +45,25 @@ def get_reachable_cells():
     if character and character.move > 0:
         reachable_cells = []
         edge_cells = []
-        for i in range(-character.move, character.move + 1):
-            for j in range(-character.move, character.move + 1):
-                if abs(i) + abs(j) <= character.move:
-                    new_row = row + i
-                    new_col = col + j
-                    if new_row >= 0 and new_row < len(game_board.board) and new_col >= 0 and new_col < len(game_board.board[0]):
-                        reachable_cells.append([new_row, new_col])
-                    else:
-                        edge_cells.append([new_row, new_col])
+        occupied_cells = []
+        for i in range(len(game_board.board)):
+            for j in range(len(game_board.board[0])):
+                node = game_board.board[i][j]
+                if node != game_board.board[row][col]:
+                    result = game_board.a_star(game_board.board[row][col], node)
+                    if result == -1:
+                        occupied_cells.append([i, j])
+                    elif result:
+                        reachable_cells.append([i, j])
         for cell in reachable_cells:
             for i, j in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                 new_row = cell[0] + i
                 new_col = cell[1] + j
                 if [new_row, new_col] not in reachable_cells and [new_row, new_col] not in edge_cells:
                     edge_cells.append([new_row, new_col])
-        return jsonify({'reachable_cells': reachable_cells, 'edge_cells': edge_cells})
+        return jsonify({'reachable_cells': reachable_cells, 'edge_cells': edge_cells, 'occupied_cells': occupied_cells})
     else:
-        return jsonify({'reachable_cells': [], 'edge_cells': []})
+        return jsonify({'reachable_cells': [], 'edge_cells': [], 'occupied_cells': []})
     
 @app.route('/get_occupant', methods=['POST'])
 def get_occupant():
@@ -96,6 +97,34 @@ def get_board():
             row_data.append(node_data)
         board_data.append(row_data)
     return jsonify({'board': board_data})
+
+@app.route('/move_character', methods=['POST'])
+def move_character():
+    data = request.get_json()
+    character_name = data.get('character')
+    new_x = data.get('new_x')
+    new_y = data.get('new_y')
+
+    # Find the character and move it to the new location
+    for row in game_board.board:
+        for node in row:
+            if node.occupant and node.occupant.name == character_name:
+                character = node.occupant
+                node.occupant = 0
+                game_board.board[new_x][new_y].occupant = character
+                return jsonify({'success': True})
+
+    return jsonify({'success': False})
+
+@app.route('/get_characters')
+def get_characters():
+    characters = []
+    for row in game_board.board:
+        for node in row:
+            if node.occupant:
+                characters.append({'name': node.occupant.name})
+    return jsonify({'characters': characters})
+
     
     
 

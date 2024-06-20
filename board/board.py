@@ -90,11 +90,13 @@ class GameBoard:
         while open_list:
             current = min(open_list, key=lambda node: f_score[node])
             if current == goal:
+                if goal.occupant and goal.occupant.team == start.occupant.team:
+                    return -1
                 path = self.reconstruct_path(came_from, current)
                 return path if len(path) <= moves + 1 else False
 
             open_list.remove(current)
-            for neighbor in self.get_neighbors(current):
+            for neighbor in self.get_neighbors(current, start.occupant.team):
                 tentative_g_score = g_score[current] + 1
                 if tentative_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
@@ -105,16 +107,17 @@ class GameBoard:
 
         return False
 
+
     def heuristic(self, node, goal):
         return abs(node.x - goal.x) + abs(node.y - goal.y)
 
-    def get_neighbors(self, node):
+    def get_neighbors(self, node, team):
         neighbors = []
-        for x, y in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+        for x, y in [(0, 1), (0, -1), (1, 0), (-1, 0)]: 
             new_x, new_y = node.x + x, node.y + y
             if 0 <= new_x < 9 and 0 <= new_y < 9:
                 neighbor = self.board[new_y][new_x]
-                if neighbor.occupant == 0:
+                if neighbor.occupant == 0 or (neighbor.occupant and neighbor.occupant.team == team):
                     neighbors.append(neighbor)
         return neighbors
 

@@ -49,16 +49,16 @@ function displaySpeakerImage(speakerName, imageIndex) {
     let leftPosition;
     switch (imageIndex) {
         case 0:
-            leftPosition = 'calc(50% - 300px)';
-            break;
-        case 1:
             leftPosition = 'calc(50% - 150px)';
             break;
+        case 1:
+            leftPosition = 'calc(50% - 50px)';
+            break;
         case 2:
-            leftPosition = 'calc(50% + 150px)';
+            leftPosition = 'calc(50% + 50px)';
             break;
         case 3:
-            leftPosition = 'calc(50% + 300px)';
+            leftPosition = 'calc(50% + 150px)';
             break;
     }
 
@@ -67,6 +67,7 @@ function displaySpeakerImage(speakerName, imageIndex) {
     imageDiv.style.left = leftPosition;
     imageDiv.style.transform = 'translate(-50%, -50%)';
     imageDiv.appendChild(image);
+    imageDiv.style.zIndex = imageIndex === pastSpeakerIndex ? 4 : 3;
 
     document.body.appendChild(imageDiv);
     speakerImages.push(imageDiv);
@@ -78,6 +79,7 @@ function displaySpeakerImage(speakerName, imageIndex) {
     nameLabelContainer.style.left = leftPosition;
     nameLabelContainer.style.transform = 'translate(-50%, -50%)';
     nameLabelContainer.style.zIndex = 3; // Set the z-index to a high value
+    
 
     const speakerNameElement = document.createElement('div');
     speakerNameElement.textContent = speakerName;
@@ -108,6 +110,7 @@ function updateSpeakerNameLabel(pastSpeakerIndex, currSpeakerIndex) {
         currSpeakerNameLabel.style.color = 'white';
         currSpeakerNameLabel.style.borderRadius = '10px';
         currSpeakerNameLabel.style.padding = '5px';
+        currSpeakerNameLabel.style.zIndex = 5; // Set z-index to 5 for the current speaker
     }
 }
 

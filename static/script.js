@@ -2,21 +2,24 @@ import startDialogue from './assets/dialogue.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     let spacePressed = false;
+    let characterToMove = null;
+    let characterMoveFrom = null;
+
     
     document.addEventListener('keydown', function (event) {
         if (event.key === ' ') {
             const highlightedCell = document.querySelector('.highlighted');
             if (highlightedCell.dataset.occupant != 0) {
-                spacePressed = !spacePressed;
-                const blueCells = document.querySelectorAll('.blue');
-                blueCells.forEach(cell => {
-                    cell.classList.remove('blue');
-                });
-                const orangeCells = document.querySelectorAll('.orange');
-                orangeCells.forEach(cell => {
-                    cell.classList.remove('orange');
-                });
-                if (spacePressed) {
+                if (!spacePressed) {
+                    spacePressed = true;
+                    const blueCells = document.querySelectorAll('.blue');
+                    blueCells.forEach(cell => {
+                        cell.classList.remove('blue');
+                    });
+                    const orangeCells = document.querySelectorAll('.orange');
+                    orangeCells.forEach(cell => {
+                        cell.classList.remove('orange');
+                    });
                     const row = highlightedCell.dataset.row;
                     const col = highlightedCell.dataset.col;
                     fetch('/get_reachable_cells', {
@@ -42,42 +45,58 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
                             });
                         });
-                }
-            }
-        }
+                    characterToMove = highlightedCell.dataset.occupant;
+                    characterMoveFrom = [row, col];
+                } else {
+                    const newHighlightedCell = document.querySelector('.highlighted');
+                    const newRow = parseInt(newHighlightedCell.dataset.row);
+                    const newCol = parseInt(newHighlightedCell.dataset.col);
+                    const oldRow = parseInt(characterMoveFrom[0]);
+                    const oldCol = parseInt(characterMoveFrom[1]);
 
-        if (event.key === ' ' && spacePressed) {
-            const highlightedCell = document.querySelector('.highlighted');
-            const row = highlightedCell.dataset.row;
-            const col = highlightedCell.dataset.col;
-            const newHighlightedCell = document.querySelector('.blue:hover');
-            if (newHighlightedCell) {
-                const newRow = newHighlightedCell.dataset.row;
-                const newCol = newHighlightedCell.dataset.col;
-                fetch('/move_character', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        character: game_board.board[row][col].occupant,
-                        new_x: newRow,
-                        new_y: newCol
+                    fetch('/get_occupant', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            row: oldRow,
+                            col: oldCol
+                        })
                     })
-                })
-                    .then(response => response.json())
-                    .then(() => {
-                        spacePressed = false;
-                        const blueCells = document.querySelectorAll('.blue');
-                        blueCells.forEach(cell => {
-                            cell.classList.remove('blue');
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.type === 'character') {
+                                fetch('/move_character', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        character: data.name,
+                                        new_x: newRow,
+                                        new_y: newCol
+                                    })
+                                })
+                                    .then(response => response.json())
+                                    .then(() => {
+                                        fetch('/get_board')
+                                            .then(response => response.json())
+                                            .then(data => populateBoard(data.board));
+                                        spacePressed = false;
+                                        characterMoveFrom = null;
+                                        const blueCells = document.querySelectorAll('.blue');
+                                        blueCells.forEach(cell => {
+                                            cell.classList.remove('blue');
+                                        });
+                                        const orangeCells = document.querySelectorAll('.orange');
+                                        orangeCells.forEach(cell => {
+                                            cell.classList.remove('orange');
+                                        });
+                                    });
+                            }
                         });
-                        const orangeCells = document.querySelectorAll('.orange');
-                        orangeCells.forEach(cell => {
-                            cell.classList.remove('orange');
-                        });
-                        updateHighlightedCell([newRow, newCol]);
-                    });
+                }
             }
         }
 
@@ -263,37 +282,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     startDialogue();
 
-    document.addEventListener('keydown', (event) => {
-        if (event.key === ' ' && spacePressed) {
-            const highlightedCell = document.querySelector('.highlighted');
-            const row = highlightedCell.dataset.row;
-            const col = highlightedCell.dataset.col;
-            fetch('/move_character', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    character: game_board.board[row][col].occupant,
-                    new_x: row,
-                    new_y: col
-                })
-            })
-                .then(response => response.json())
-                .then(() => {
-                    spacePressed = false;
-                    const blueCells = document.querySelectorAll('.blue');
-                    blueCells.forEach(cell => {
-                        cell.classList.remove('blue');
-                    });
-                    const orangeCells = document.querySelectorAll('.orange');
-                    orangeCells.forEach(cell => {
-                        cell.classList.remove('orange');
-                    });
-                });
-        }
-    });
-
     fetch('/get_board')
         .then(response => response.json())
         .then(data => populateBoard(data.board));
@@ -317,7 +305,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
         }
-        updateHighlightedCell([0, 0]); // Highlight the first cell by default
     }
     
 
