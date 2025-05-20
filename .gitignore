@@ -1,3 +1,5 @@
 board/ai_player_test.py
 character/tests.py
 weapon/tests.py
+templates/
+static/
