@@ -17,7 +17,7 @@ class Character:
         self.x = x
         self.y = y
         self.value = value
-        self.used = used
+        self.used = 0
 
     def change_health(self, amount):
         self.health += amount

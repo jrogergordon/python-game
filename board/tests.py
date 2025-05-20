@@ -359,6 +359,45 @@ class TestGameBoard(unittest.TestCase):
         self.assertEqual(best_move[1], 1)
         self.assertEqual(best_move[2], 2)
 
+    def test_find_targets_green_team(self):
+        # Find targets for the green team
+        self.game_board.find_targets("green")
+
+        # Expected targets for the green team (should only target red characters)
+        expected_targets = {
+            self.green_char: [[self.red_char, 0, []]]  # Expected fight value and reachable nodes can be zero for simplicity in this test
+        }
+
+        # Verify the currTargets object
+        self.assertEqual(self.game_board.currTargets, expected_targets)
+
+    def test_find_targets_yellow_team(self):
+        # Find targets for the yellow team
+        self.game_board.find_targets("yellow")
+
+        # Expected targets for the yellow team (should only target red characters)
+        expected_targets = {
+            self.yellow_char: [[self.red_char, 0, []]]  # Expected fight value and reachable nodes can be zero for simplicity in this test
+        }
+
+        # Verify the currTargets object
+        self.assertEqual(self.game_board.currTargets, expected_targets)
+
+    def test_find_targets_red_team(self):
+        # Find targets for the red team
+        self.game_board.find_targets("red")
+
+        # Expected targets for the red team (should target green and yellow characters)
+        expected_targets = {
+            self.red_char: [
+                [self.green_char, 0, []],  # Expected fight value and reachable nodes can be zero for simplicity in this test
+                [self.yellow_char, 0, []]  # Expected fight value and reachable nodes can be zero for simplicity in this test
+            ]
+        }
+
+        # Verify the currTargets object
+        self.assertEqual(self.game_board.currTargets, expected_targets)
+
 
 if __name__ == '__main__':
     unittest.main()

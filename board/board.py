@@ -3,7 +3,7 @@ sys.path.append('/home/jrogergordon/python_game/')
 
 from mapNode.map_node import board_node
 from character.character import Character
-from board.ai_player import AI
+from ai_player import AI
 
 
 class GameBoard:
@@ -79,6 +79,7 @@ class GameBoard:
         self.board[x][y] = piece
 
     def a_star(self, start, goal):
+        path = []
         moves = start.occupant.move
         open_list = [start]
         came_from = {}
@@ -91,7 +92,7 @@ class GameBoard:
             current = min(open_list, key=lambda node: f_score[node])
             if current == goal:
                 if goal.occupant and goal.occupant.team == start.occupant.team:
-                    return -1
+                    return -1 if len(path) <= moves + 1 else False
                 path = self.reconstruct_path(came_from, current)
                 return path if len(path) <= moves + 1 else False
 
@@ -259,23 +260,25 @@ class GameBoard:
                     weapon2.usage = 0
 
     def calculate_hit_likelihood(self, character1, character2):
-        weapon1 = character1.equipped
-        weapon2 = character2.equipped
+        if character1.equipped != "":
+            weapon1 = character1.equipped
+        if character2.equipped != "":
+            weapon2 = character2.equipped
 
         # Calculate hit likelihood for character 1
         char1_skill_factor = character1.skill * 0.04  # Weigh character skill heavily
         char1_speed_factor = character1.speed * 0.0225  # Weigh character speed moderately
-        weapon1_weight_factor = weapon1.weight * -0.0075 if weapon1 else 0  # Weigh weapon weight lightly negatively
+        # weapon1_weight_factor = weapon1.weight * -0.0075 if weapon1 else 0  # Weigh weapon weight lightly negatively
         char2_dodge_factor = character2.speed * -0.015  # Higher character2 speed reduces character1 hit chance
-        char1_hit_likelihood = char1_skill_factor + char1_speed_factor + weapon1_weight_factor + char2_dodge_factor
+        char1_hit_likelihood = char1_skill_factor + char1_speed_factor + char2_dodge_factor # + weapon1_weight_factor 
         char1_hit_likelihood = max(0, min(1, char1_hit_likelihood))  # Ensure value is between 0 and 1
 
         # Calculate hit likelihood for character 2
         char2_skill_factor = character2.skill * 0.04
         char2_speed_factor = character2.speed * 0.0225
-        weapon2_weight_factor = weapon2.weight * -0.0075 if weapon2 else 0
+        # weapon2_weight_factor = weapon2.weight * -0.0075 if weapon2 else 0
         char1_dodge_factor = character1.speed * -0.015
-        char2_hit_likelihood = char2_skill_factor + char2_speed_factor + weapon2_weight_factor + char1_dodge_factor
+        char2_hit_likelihood = char2_skill_factor + char2_speed_factor + char1_dodge_factor #+weapon2_weight_factor
         char2_hit_likelihood = max(0, min(1, char2_hit_likelihood))  # Ensure value is between 0 and 1
 
         return char1_hit_likelihood, char2_hit_likelihood
