@@ -1,5 +1,6 @@
-board/ai_player_test.py
+board/test_ai.py
 character/tests.py
 weapon/tests.py
 templates/
 static/
+board/tests.py
