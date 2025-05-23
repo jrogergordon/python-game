@@ -58,7 +58,7 @@ class AI:
                 # Calculate the value of the health change
                 health_change_value = (health_change1 / unit.totalHealth) * unit.value + (health_change2 / enemy_unit.totalHealth) * enemy_unit.value
                 # Calculate the placement value
-                placement_value = self.calculate_placement_value(unit, self.units, game_board.enemies if self.team != "red" else game_board.player + game_board.ally + game_board.others, game_board)
+                placement_value = self.calculate_placement_value(unit, self.units, game_board.enemies if self.team != "red" else game_board.players + game_board.ally + game_board.others, game_board)
                 # Undo the move and the fight
                 unit.x, unit.y = old_x, old_y
                 unit.health, enemy_unit.health = old_health1, old_health2
@@ -105,8 +105,8 @@ class AI:
             current_units = game_board.ally
         else:
             current_units = game_board.enemies
-        friendly_units = game_board.player + game_board.ally + game_board.others if self.team != "red" else game_board.enemies
-        enemy_units = game_board.enemies if self.team != "red" else game_board.player + game_board.ally + game_board.others
+        friendly_units = game_board.players + game_board.ally + game_board.others if self.team != "red" else game_board.enemies
+        enemy_units = game_board.enemies if self.team != "red" else game_board.players + game_board.ally + game_board.others
         board_value = 0
         board_value_breakdown = {}
         for unit in current_units:
@@ -145,7 +145,7 @@ class AI:
 
         # Update the placement value for the unit
         old_placement_value = self.boardValueBreakdown[unit]["placement_value"]
-        self.boardValueBreakdown[unit]["placement_value"] = self.calculate_placement_value(unit, self.units, game_board.enemies if self.team != "red" else game_board.player + game_board.ally + game_board.others, game_board)
+        self.boardValueBreakdown[unit]["placement_value"] = self.calculate_placement_value(unit, self.units, game_board.enemies if self.team != "red" else game_board.players + game_board.ally + game_board.others, game_board)
         new_placement_value = self.boardValueBreakdown[unit]["placement_value"]
         board_value += new_placement_value - old_placement_value
 
