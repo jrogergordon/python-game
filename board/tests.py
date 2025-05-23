@@ -2,7 +2,7 @@ import sys
 sys.path.append('/home/jrogergordon/python_game/')
 
 import unittest
-from board import GameBoard
+from .board import GameBoard
 from character.character import Character
 from mapNode.map_node import board_node
 from weapon.weapon import Weapon
@@ -22,6 +22,7 @@ class TestGameBoard(unittest.TestCase):
     #             self.assertIsInstance(cell, map_node) 
 
     def test_place_piece(self):
+        print("board")
         # Test 1: Placing a piece at a valid coordinate
         self.game_board.place_piece(u'\u254F', [1, 1])
         self.assertEqual(self.game_board.board[1][1], u'\u254F')
